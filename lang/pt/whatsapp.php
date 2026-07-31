@@ -7,6 +7,6 @@ return [
     "*Nome:* :nome\n" .
     "*E-mail:* :email\n" .
     "*Celular:* :whatsapp\n" .
-    (!empty(':name') ? ":name\n" : "").
+    (!empty(':empresa') ? ":empresa\n" : "").
     (!empty(':numemployees') ? ":numemployees\n" : "")
 ];

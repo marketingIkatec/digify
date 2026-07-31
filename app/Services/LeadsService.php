@@ -47,9 +47,8 @@ class LeadsService
     public function createWhatsAppMessage($lead, $form){
         $whatsapp = (!empty($form) and $form->form_sent_url) ? $form->form_sent_url : getSettings('form_whatsapp_commercial_'.$lead->locale);
         $extraData = $lead->extra_data_label; 
-        $segmento = !empty($extraData['0-2/qual_segmento_representa_melhor_seu_negocio']) ? $extraData['0-2/qual_segmento_representa_melhor_seu_negocio'] : '';
+        $empresa = !empty($extraData['0-2/name']) ? $extraData['0-2/name'] : '';
         $numemployees = !empty($extraData['0-1/numemployees']) ? $extraData['0-1/numemployees'] : '';
-        $principal_necessidade = !empty($extraData['0-1/principal_necessidade']) ? $extraData['0-1/principal_necessidade'] : '';
         
         $mensagem = __('whatsapp.lead_message', [
             'site_name' => getSettings('site_name_short'),
@@ -57,9 +56,8 @@ class LeadsService
             'email'     => $lead->email,
             'whatsapp'  => $lead->whatsapp,
             'site'      => $lead->url ?? __('forms.no_website'),
-            'segmento'  => $segmento ? "*" . __('forms.segment') . ":* " . $segmento : '',
+            'empresa'  => $empresa ? "*Nome da Empresa:* " . $empresa : '',
             'numemployees' => $numemployees ? "*" . __('forms.numemployees') . ":* " . $numemployees : '',
-            'principal_necessidade' => $principal_necessidade ? "*" . __('forms.principal_necessidade') . ":* " . $principal_necessidade : '',
         ]);
         return "https://wa.me/".preg_replace('/\D/', '', $whatsapp)."?text=" . urlencode($mensagem);
     }   
