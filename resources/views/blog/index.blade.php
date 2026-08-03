@@ -8,7 +8,7 @@
 <div class="blog-page">
     <section class="blog-hero">
         <div class="blog-hero-content">
-            <span class="blog-eyebrow">Ikatec Blog</span>
+            <span class="blog-eyebrow">Digify Blog</span>
             <h1 class="blog-hero-title">Ideias, análise e visão prática para negócios digitais.</h1>
             <p class="blog-hero-text">Leituras objetivas sobre tecnologia, vendas e automação para apoiar decisões mais claras no dia a dia.</p>
 
