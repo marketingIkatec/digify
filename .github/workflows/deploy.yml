@@ -11,12 +11,15 @@ jobs:
 
     steps:
       - name: Test SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: 65002
+          protocol: tcp4
+          timeout: 60s
+          debug: true
           script: |
             hostname
             whoami
