@@ -15,10 +15,10 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 65002
+          key: ${{ secrets.PORT }}
+          port: ${{ secrets.HOST }}
           protocol: tcp4
-          timeout: 60s
+          timeout: 120s
           debug: true
           script: |
             hostname
