@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   setupTabs(".js-feature-tab", ".features__panel");
   setupHeaderShrink();
+  setupSiteNavigation();
   setupCarousel();
   setupSmoothScrolling();
   setupSectionSpy();
@@ -126,6 +127,80 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
+  }
+
+  /* ── Menu principal com submenu ── */
+  function setupSiteNavigation() {
+    var header = document.querySelector(".site-header");
+    if (!header) return;
+
+    var toggle = header.querySelector(".site-header__menu-toggle");
+    var nav = header.querySelector(".site-nav");
+    var submenuToggles = [].slice.call(
+      header.querySelectorAll(".site-nav__submenu-toggle"),
+    );
+    var mobileQuery = window.matchMedia("(max-width: 1060px)");
+
+    if (!toggle || !nav) return;
+
+    function closeSubmenus() {
+      submenuToggles.forEach(function (button) {
+        button.setAttribute("aria-expanded", "false");
+        var item = button.closest(".site-nav__item--has-children");
+        if (item) item.classList.remove("is-submenu-open");
+      });
+    }
+
+    function setOpen(open) {
+      header.classList.toggle("is-menu-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      if (!open) closeSubmenus();
+    }
+
+    toggle.addEventListener("click", function () {
+      setOpen(!header.classList.contains("is-menu-open"));
+    });
+
+    submenuToggles.forEach(function (button) {
+      button.addEventListener("click", function () {
+        var item = button.closest(".site-nav__item--has-children");
+        if (!item) return;
+
+        var open = !item.classList.contains("is-submenu-open");
+        item.classList.toggle("is-submenu-open", open);
+        button.setAttribute("aria-expanded", String(open));
+      });
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!header.contains(event.target)) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    });
+
+    nav.addEventListener("click", function (event) {
+      if (mobileQuery.matches && event.target.closest("a.site-nav__link")) {
+        setOpen(false);
+      }
+    });
+
+    function syncMode() {
+      if (!mobileQuery.matches) setOpen(false);
+    }
+
+    if (mobileQuery.addEventListener) {
+      mobileQuery.addEventListener("change", syncMode);
+    } else {
+      mobileQuery.addListener(syncMode);
+    }
+
+    syncMode();
   }
 
   /* ── Carrossel 3D (seção "do lead ao fechamento") ── */
@@ -746,4 +821,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ====== Modal whatsappSupportModal ====== */
 });
-
