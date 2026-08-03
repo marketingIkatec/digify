@@ -88,3 +88,4 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll", updateActive, { passive: true });
   window.addEventListener("resize", updateActive);
 });
+
