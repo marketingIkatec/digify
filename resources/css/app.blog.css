@@ -68,6 +68,8 @@
 .blog-page .blog-hero-content {
   position: relative;
   z-index: 1;
+  display: grid;
+  gap: var(--space-4);
 }
 
 .blog-eyebrow,
@@ -425,6 +427,10 @@
   padding: var(--space-10);
   text-align: center;
   border-radius: var(--radius-xl);
+}
+
+.blog-empty > * + * {
+  margin-top: var(--space-3);
 }
 
 .blog-empty h3 {
@@ -843,10 +849,23 @@
   .blog-section-heading {
     align-items: flex-start;
     flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .blog-toolbar > div,
+  .blog-section-heading > div {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .blog-toolbar p,
+  .blog-section-heading p {
+    text-align: left;
   }
 
   .blog-search-form {
     flex-direction: column;
+    gap: var(--space-2);
   }
 
   .blog-search-button {

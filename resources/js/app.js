@@ -134,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     var header = document.querySelector(".site-header");
     if (!header) return;
 
+    var menuCheck = header.querySelector(".site-header__menu-check");
     var toggle = header.querySelector(".site-header__menu-toggle");
     var nav = header.querySelector(".site-nav");
     var submenuToggles = [].slice.call(
@@ -153,13 +154,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setOpen(open) {
       header.classList.toggle("is-menu-open", open);
+      if (menuCheck) menuCheck.checked = open;
       toggle.setAttribute("aria-expanded", String(open));
       if (!open) closeSubmenus();
     }
 
-    toggle.addEventListener("click", function () {
-      setOpen(!header.classList.contains("is-menu-open"));
-    });
+    if (menuCheck) {
+      menuCheck.addEventListener("change", function () {
+        setOpen(menuCheck.checked);
+      });
+    } else {
+      toggle.addEventListener("click", function () {
+        setOpen(!header.classList.contains("is-menu-open"));
+      });
+    }
 
     submenuToggles.forEach(function (button) {
       button.addEventListener("click", function () {
