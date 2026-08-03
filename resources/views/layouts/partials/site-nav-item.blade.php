@@ -1,9 +1,11 @@
 @php
     $children = ($page->childrenRecursive ?? collect())->where('status', true)->values();
+    $external = str_starts_with($page->slug, 'http://') || str_starts_with($page->slug, 'https://');
+    $href = $external ? $page->slug : route('site.show', $page->slug);
 @endphp
 
 <div class="site-nav__item {{ $children->isNotEmpty() ? 'site-nav__item--has-children' : '' }}">
-    <a class="site-nav__link" href="{{ route('site.show', $page->slug) }}">{{ $page->titulo }}</a>
+    <a class="site-nav__link" href="{{ $href }}" @if($external) target="_blank" rel="noopener noreferrer" @endif>{{ $page->titulo }}</a>
 
     @if ($children->isNotEmpty())
         <button class="site-nav__submenu-toggle" type="button" aria-expanded="false" aria-label="Abrir submenu de {{ $page->titulo }}">
