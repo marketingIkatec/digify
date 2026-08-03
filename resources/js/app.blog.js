@@ -1,76 +1,90 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
+  const content = document.getElementById("conteudo-blog");
+  const indice = document.getElementById("indice");
+  const box = document.getElementById("indiceBox");
+  const toggle = document.getElementById("indiceToggle");
 
-    const content = document.querySelectorAll("#conteudo-blog h2");
-    const indice = document.getElementById("indice");
-    const box = document.getElementById("indiceBox");
+  if (!box || !indice) {
+    return;
+  }
 
-    /* --- Gerar índice automático --- */
-    content.forEach((h2, i) => {
-        const id = "secao-" + i;
-        h2.setAttribute("id", id);
+  if (toggle) {
+    const desktopQuery = window.matchMedia("(min-width: 992px)");
 
-        const titulo = h2.textContent.trim();
+    const syncState = () => {
+      box.classList.toggle("open", desktopQuery.matches);
+      toggle.setAttribute("aria-expanded", String(box.classList.contains("open")));
+    };
 
-        const li = document.createElement("li");
-        li.textContent = titulo;
+    syncState();
 
-        li.addEventListener("click", () => {
-            document.getElementById(id).scrollIntoView({ behavior: "smooth" });
-
-            document.querySelectorAll(".indice-li li")
-                .forEach(el => el.classList.remove("active"));
-
-            li.classList.add("active");
-        });
-
-        indice.appendChild(li);
+    toggle.addEventListener("click", () => {
+      box.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", String(box.classList.contains("open")));
     });
 
+    if (typeof desktopQuery.addEventListener === "function") {
+      desktopQuery.addEventListener("change", syncState);
+    }
+  }
 
-    /* --- Toggle com animação (mobile e desktop) --- */
-    function toggleIndice() {
-        box.classList.toggle("open");
+  if (!content) {
+    return;
+  }
+
+  const headings = content.querySelectorAll("h2, h3");
+
+  if (!headings.length) {
+    box.classList.add("is-empty");
+    return;
+  }
+
+  const entries = [];
+
+  headings.forEach((heading, index) => {
+    if (!heading.id) {
+      heading.id = `secao-${index + 1}`;
     }
 
-    if (window.innerWidth >= 992) {
-        toggleIndice();   // desktop: abre
-    }
+    const item = document.createElement("li");
+    item.className = `blog-toc-item blog-toc-item--${heading.tagName.toLowerCase()}`;
 
-    document.getElementById("indiceToggle").addEventListener("click", toggleIndice);
-
-    document.getElementById("indiceDesktopToggle").addEventListener("click", toggleIndice);
-
-
-
-    /* --- Scroll Spy do índice --- */
-    window.addEventListener("scroll", () => {
-        let scrollPosition = window.scrollY + 200;
-
-        content.forEach((h2, index) => {
-            const top = h2.offsetTop;
-            const next = content[index + 1]?.offsetTop;
-
-            if (scrollPosition >= top && (!next || scrollPosition < next)) {
-                document.querySelectorAll(".indice-li li")
-                    .forEach(li => li.classList.remove("active"));
-
-                indice.children[index].classList.add("active");
-            }
-        });
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = heading.textContent.trim();
+    button.addEventListener("click", () => {
+      heading.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", `#${heading.id}`);
     });
 
-    /* --- Fechar índice ao chegar na seção #blogs --- */
-  const blogsSection = document.getElementById("posts-relacionados");
-
-  window.addEventListener("scroll", () => {
-      if (!blogsSection) return;
-
-      const blogsTop = blogsSection.offsetTop;
-      const scrollY = window.scrollY + window.innerHeight / 3;
-
-      if (scrollY >= blogsTop) {
-          box.classList.remove("open"); // fecha com animação
-      }
+    item.appendChild(button);
+    indice.appendChild(item);
+    entries.push({ heading, item });
   });
 
+  const setActive = (id) => {
+    entries.forEach(({ heading, item }) => {
+      item.classList.toggle("is-active", heading.id === id);
+    });
+  };
+
+  const updateActive = () => {
+    const offset = window.scrollY + 180;
+    let activeId = entries[0].heading.id;
+
+    entries.forEach((entry, index) => {
+      const top = entry.heading.getBoundingClientRect().top + window.scrollY;
+      const nextTop = entries[index + 1]?.heading.getBoundingClientRect().top + window.scrollY;
+
+      if (offset >= top && (!nextTop || offset < nextTop)) {
+        activeId = entry.heading.id;
+      }
+    });
+
+    setActive(activeId);
+  };
+
+  updateActive();
+  window.addEventListener("scroll", updateActive, { passive: true });
+  window.addEventListener("resize", updateActive);
 });

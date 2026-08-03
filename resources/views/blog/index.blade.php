@@ -1,54 +1,49 @@
 @extends('app')
 
 @section('content')
+@php
+    $search = request('search');
+@endphp
+
 <div class="blog-page">
     <section class="blog-hero">
         <div class="blog-hero-content">
             <span class="blog-eyebrow">Ikatec Blog</span>
-            <h1 class="blog-hero-title">
-                Conteúdos para tecnologia, atendimento e crescimento digital
-            </h1>
-            <p class="blog-hero-text">
-                Artigos, tendências, guias e análises produzidos pelos nossos especialistas para ajudar empresas a evoluírem com estratégia e tecnologia.
-            </p>
+            <h1 class="blog-hero-title">Ideias, análise e visão prática para negócios digitais.</h1>
+            <p class="blog-hero-text">Leituras objetivas sobre tecnologia, vendas e automação para apoiar decisões mais claras no dia a dia.</p>
 
             <form action="{{ route('blog.site.index') }}" method="GET" class="blog-search-form">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar artigo, categoria ou autor" class="blog-search-input">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Buscar artigo, categoria ou autor" class="blog-search-input">
                 <button type="submit" class="blog-search-button" aria-label="Buscar">
                     <svg class="blog-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </button>
             </form>
+
+            <div class="blog-hero-meta">
+                <span>{{ $blogs->total() }} artigos publicados</span>
+                <span>Atualizado com foco em resultado</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="blog-toolbar">
+        <div>
+            <span class="blog-section-kicker">Publicações</span>
+            <h2>{{ !empty($objSearch) ? $objSearch->display_name : 'Últimos artigos' }}</h2>
         </div>
 
-        <aside class="blog-hero-panel">
-            <h2>Explore por tema</h2>
-            <div class="blog-chip-list">
-                @foreach($blogCategorias as $categoria)
-                    <a href="{{ route('blog.categoria.site.show', $categoria->slug) }}" class="blog-chip">
-                        {{ $categoria->categoria }}
-                    </a>
-                @endforeach
-            </div>
-        </aside>
-    </section>
+        <p>{{ $blogs->total() }} conteúdo(s) encontrado(s)</p>
+    </div>
 
     <section class="blog-layout">
         <main class="blog-main">
-            <div class="blog-section-heading">
-                <div>
-                    <span class="blog-section-kicker">Publicações</span>
-                    <h2>{{ !empty($objSearch) ? $objSearch->display_name : 'Últimos artigos' }}</h2>
-                </div>
-                <p>{{ $blogs->total() }} conteúdo(s) encontrado(s)</p>
-            </div>
-
             @if($blogs->isNotEmpty())
                 <div class="blog-grid">
                     @foreach($blogs as $blog)
                         @php
-                            $image = $blog->imagem ? asset('storage/' . $blog->imagem) : '/images/na_midia_hero.png';
+                            $image = $blog->imagem ? asset('storage/' . $blog->imagem) : asset('/images/na_midia_hero.png');
                         @endphp
                         <article class="blog-card">
                             <a href="{{ route('blog.site.show', $blog->slug) }}" class="blog-card-image">
@@ -66,9 +61,11 @@
                                 </div>
 
                                 <div class="blog-card-categories">
-                                    @foreach($blog->categorias as $categoria)
+                                    @forelse($blog->categorias as $categoria)
                                         <a href="{{ route('blog.categoria.site.show', $categoria->slug) }}">{{ $categoria->categoria }}</a>
-                                    @endforeach
+                                    @empty
+                                        <span class="blog-chip">Sem categoria</span>
+                                    @endforelse
                                 </div>
 
                                 <h3><a href="{{ route('blog.site.show', $blog->slug) }}">{{ $blog->titulo }}</a></h3>
@@ -92,6 +89,7 @@
                 @endif
             @else
                 <div class="blog-empty">
+                    <span class="blog-section-kicker">Sem resultados</span>
                     <h3>Nenhum artigo encontrado</h3>
                     <p>Tente remover filtros ou buscar por outro termo.</p>
                     <a href="{{ route('blog.site.index') }}">Ver todos os artigos</a>
@@ -101,20 +99,25 @@
 
         <aside class="blog-sidebar">
             <section class="blog-sidebar-card">
+                <span class="blog-section-kicker">Navegação</span>
                 <h3>Categorias</h3>
                 <div class="blog-sidebar-links">
-                    @foreach($blogCategorias as $categoria)
+                    @forelse($blogCategorias as $categoria)
                         <a href="{{ route('blog.categoria.site.show', $categoria->slug) }}">
                             <span>{{ $categoria->categoria }}</span>
+                            <span>→</span>
                         </a>
-                    @endforeach
+                    @empty
+                        <p>Nenhuma categoria ativa.</p>
+                    @endforelse
                 </div>
             </section>
 
             <section class="blog-sidebar-card">
-                <h3>Autores</h3>
+                <span class="blog-section-kicker">Autores</span>
+                <h3>Equipe que escreve</h3>
                 <div class="blog-authors-list">
-                    @foreach($blogAutores as $autor)
+                    @forelse($blogAutores as $autor)
                         <a href="{{ route('blog.autor.site.show', $autor->slug) }}" class="blog-author-row">
                             @if($autor->imagem)
                                 <img src="{{ asset('storage/' . $autor->imagem) }}" alt="{{ $autor->autor }}">
@@ -123,7 +126,9 @@
                             @endif
                             <span>{{ $autor->autor }}</span>
                         </a>
-                    @endforeach
+                    @empty
+                        <p>Nenhum autor ativo.</p>
+                    @endforelse
                 </div>
             </section>
         </aside>

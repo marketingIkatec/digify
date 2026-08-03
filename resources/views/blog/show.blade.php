@@ -1,5 +1,9 @@
 @extends('app')
 
+@section('css_js')
+    <script src="/build/assets/js_blog.js" defer></script>
+@endsection
+
 @section('content')
 @php
     $image = $blog->imagem ? asset('storage/' . $blog->imagem) : '/images/na_midia_hero.png';
@@ -16,6 +20,7 @@
         </nav>
 
         <header class="blog-article-header">
+            <span class="blog-article-kicker">Artigo</span>
             <div class="blog-card-categories blog-article-categories">
                 @foreach($blog->categorias as $categoria)
                     <a href="{{ route('blog.categoria.site.show', $categoria->slug) }}">{{ $categoria->categoria }}</a>
@@ -49,13 +54,26 @@
         </div>
 
         <div class="blog-article-layout">
-            <div class="blog-article-content">
+            <div class="blog-article-content" id="conteudo-blog">
                 {!! $blog->conteudo !!}
             </div>
 
             <aside class="blog-article-aside">
+                <div class="blog-sidebar-card blog-toc-card" id="indiceBox">
+                    <div class="blog-sidebar-card__head">
+                        <div>
+                            <span class="blog-section-kicker">Sumário</span>
+                            <h3>Neste artigo</h3>
+                        </div>
+                        <button type="button" class="blog-toc-toggle" id="indiceToggle" aria-expanded="false">Índice</button>
+                    </div>
+
+                    <ol id="indice" class="blog-toc-list"></ol>
+                </div>
+
                 @if($blog->autor)
                     <div class="blog-sidebar-card">
+                        <span class="blog-section-kicker">Autor</span>
                         <h3>Sobre o autor</h3>
                         <div class="blog-author-profile">
                             @if($blog->autor->imagem)
@@ -63,7 +81,7 @@
                             @endif
                             <strong>{{ $blog->autor->autor }}</strong>
                             @if($blog->autor->resumo)
-                                {!! $blog->autor->resumo !!}</p>
+                                <div>{!! $blog->autor->resumo !!}</div>
                             @endif
                             <a href="{{ route('blog.autor.site.show', $blog->autor->slug) }}">Ver artigos do autor</a>
                         </div>
@@ -71,6 +89,7 @@
                 @endif
 
                 <div class="blog-sidebar-card">
+                    <span class="blog-section-kicker">Compartilhar</span>
                     <h3>Compartilhar</h3>
                     <div class="blog-share-links">
                         <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(request()->url()) }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
@@ -100,6 +119,12 @@
                             <img src="{{ $relatedImage }}" alt="{{ $related->titulo }}" loading="lazy">
                         </a>
                         <div class="blog-card-body">
+                            <div class="blog-card-meta">
+                                @if($related->autor)
+                                    <a href="{{ route('blog.autor.site.show', $related->autor->slug) }}">{{ $related->autor->autor }}</a>
+                                @endif
+                            </div>
+
                             <h3><a href="{{ route('blog.site.show', $related->slug) }}">{{ $related->titulo }}</a></h3>
                             <p>{{ $related->resumo }}</p>
                             <a href="{{ route('blog.site.show', $related->slug) }}" class="blog-read-more">Ler artigo</a>
