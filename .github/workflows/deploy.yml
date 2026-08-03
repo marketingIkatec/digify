@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test SSH
+      - name: Deploy no servidor
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -21,6 +21,15 @@ jobs:
           timeout: 120s
           debug: true
           script: |
-            hostname
-            whoami
-            pwd
+            set -e
+
+            cd /home/u178981784/domains/digify.com.br/digify
+
+            echo "Commit antes:"
+            git rev-parse --short HEAD
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "Commit depois:"
+            git rev-parse --short HEAD
