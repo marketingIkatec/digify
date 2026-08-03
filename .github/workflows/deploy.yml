@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/u178981784/digify.com.br/digify
+
+            echo "Atualizando código..."
+            git fetch origin
+            git reset --hard origin/main
+
+            echo "Instalando dependências..."
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            echo "Executando migrações..."
+            php artisan migrate --force
+
+            echo "Limpando e recriando caches..."
+            php artisan optimize:clear
+            php artisan optimize
+
+            echo "Deploy concluído!"
