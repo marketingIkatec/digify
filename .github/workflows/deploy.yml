@@ -15,8 +15,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PORT }}
-          port: ${{ secrets.HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
           protocol: tcp4
           timeout: 120s
           debug: true
