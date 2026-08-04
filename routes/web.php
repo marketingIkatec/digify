@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\IndexController;  
+use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\Admin\BlogController;  
 use App\Http\Controllers\Admin\NaMidiaController;  
 use App\Http\Controllers\Admin\SiteController;
@@ -28,6 +29,8 @@ Route::middleware('registrar.visita')->group(function () {
     Route::get('/blog/autor/{autor}', [BlogController::class, 'blogSiteIndex'])->name('blog.autor.site.show');
     Route::get('/blog/categoria/{categoria}', [BlogController::class, 'blogSiteIndex'])->name('blog.categoria.site.show');
     Route::get('/blog/{slug_blog}', [BlogController::class, 'blogSiteShow'])->name('blog.site.show');
+
+    Route::get('/calculadora', [CalculatorController::class, 'index'])->name('calculadora');
 
     Route::post('/lead-contato', [LeadAppController::class, 'leadContatoStore'])->name('lead.leadContato.store');
     Route::post('/form-custom-store', [LeadAppController::class, 'formCustomStore'])->name('form.custom.store');
