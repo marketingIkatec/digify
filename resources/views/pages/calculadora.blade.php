@@ -506,7 +506,6 @@
         <div class="calculator-hero">
             <span class="calculator-kicker">Calculadora de orçamento</span>
             <h1 class="calculator-title">Comparativo de Orçamento</h1>
-            <p class="calculator-lead">Validação visual da calculadora com os dados carregados do banco, mantendo a mesma experiência da versão anterior.</p>
         </div>
 
         <div class="calculator-bar">
@@ -683,6 +682,10 @@ function detailDisplay(key, value) {
   return detailValue(value);
 }
 
+function planDetailDisplay(plan, key, value) {
+  return detailDisplay(key, value);
+}
+
 function compareExtraLabel(value) {
   if (value === null || value === undefined || value === '') return '—';
   const text = String(value);
@@ -696,17 +699,20 @@ function compareStorageLabel(sc) {
   const value = compareExtraValue(sc, 'storage');
   if (value === null || value === undefined || value === '') return '—';
   const text = String(value);
+  if (!Number.isFinite(Number(text))) return text;
   return /gb$/i.test(text) ? text : `${text} GB`;
 }
 
 function compareExtraValue(sc, key) {
   const d = (PLANS[sc.plan] && PLANS[sc.plan].details) ? PLANS[sc.plan].details : {};
   const raw = d[key];
-  if (key === 'pipelines' && raw !== null && raw !== undefined && raw !== '') {
-    const text = String(raw);
-    if (text.toLowerCase().includes('ilimit')) return raw;
+  if (raw !== null && raw !== undefined && raw !== '') {
+    const text = String(raw).trim();
+    if (text !== '' && Number.isNaN(Number(text))) {
+      return raw;
+    }
+
     if (Number(sc[key]) === planInitialCount(sc.plan, key)) return raw;
-    return sc[key];
   }
   return sc[key];
 }
@@ -731,7 +737,7 @@ function renderPlanDetails(sc) {
         ${(key === 'digisac_user_price' && Number(d[key] || 0) === 0) ? '' : `
         <div class="plan-detail">
           <span class="k">${detailLabel(key)}</span>
-          <span class="v">${detailDisplay(key, d[key])}</span>
+          <span class="v">${planDetailDisplay(sc.plan, key, d[key])}</span>
         </div>
       `}
       `).join('')}
@@ -896,7 +902,10 @@ function renderCompareTable(){
       const d = (PLANS[sc.plan] && PLANS[sc.plan].details) ? PLANS[sc.plan].details : {};
       const value = d[key];
       const txt = detailDisplay(key, value);
-      h+=`<td>${typeof value === 'boolean' ? (value ? '<span class="plan-yes">✓</span>' : '<span class="plan-no">—</span>') : txt}</td>`;
+      const cell = (key === 'digisac_user_price' && Number(value || 0) === 0)
+        ? '<span class="check-no">—</span>'
+        : (typeof value === 'boolean' ? (value ? '<span class="plan-yes">✓</span>' : '<span class="plan-no">—</span>') : txt);
+      h+=`<td>${cell}</td>`;
     });
     h+=`</tr>`;
   });
