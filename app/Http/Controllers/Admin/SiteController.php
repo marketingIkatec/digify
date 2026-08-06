@@ -15,6 +15,9 @@ use App\Models\PageBlockType;
 use App\Models\IntegracoesCategoria;
 use App\Models\FormHubSpot;
 use App\Models\PageSettings;
+use App\Models\BudgetPlan;
+use App\Models\BudgetModule;
+use App\Models\BudgetFeature;
 use App\Http\Requests\PageRequest;
 use App\Http\Requests\PageBlockRequest;
 use App\Services\UploadService;
@@ -38,14 +41,41 @@ class SiteController extends Controller
             abort(404);
         }
 
-        if($item->id == env('PAGE_ID_INTEGRACOES')){
-            $integracoesCategoria = IntegracoesCategoria::where('status', 1)->get();
-            $pages = Page::where(['page_id' => $item->id, 'status' => 1])->get();
+        if($item->slug == 'planos'){
             
-            return view('pages.site-home')->with('item', $item)
-                    ->with('slug', '')
-                    ->with('integracoesCategoria', $integracoesCategoria)
-                    ->with('pages', $pages);
+            $budgetPlans = BudgetPlan::query()
+                ->with([
+                    'modules' => function ($query) {
+                        $query->orderBy('sort_order');
+                    },
+                    'features' => function ($query) {
+                        $query->orderBy('sort_order');
+                    },
+                    'extraPrices' => function ($query) {
+                        $query->orderBy('sort_order');
+                    },
+                ])
+                ->orderBy('sort_order')
+                ->get();
+
+            $budgetModules = BudgetModule::query()
+                ->with(['plans' => function ($query) {
+                    $query->orderBy('sort_order');
+                }])
+                ->orderBy('sort_order')
+                ->get();
+
+            $budgetFeatures = BudgetFeature::query()
+                ->with(['plans' => function ($query) {
+                    $query->orderBy('sort_order');
+                }])
+                ->orderBy('sort_order')
+                ->get();
+
+            return view('pages.index')->with('item', $item)
+                    ->with('budgetPlans', $budgetPlans)
+                    ->with('budgetFeatures', $budgetFeatures)
+                    ->with('budgetModules', $budgetModules);
         }
 
         return view('pages.site-home')->with('item', $item);

@@ -1,107 +1,143 @@
 ﻿@php
 
-$planos = [
-    [
-        'name' => 'Free',
-        'price' => 'R$ 0',
-        'caption' => 'Para começar a organizar o básico sem custo.',
-        'users' => 'Até 3 usuários',
-        'leads' => '500 leads',
-        'pipelines' => '1 pipeline',
-        'dashboards' => '1 dashboard',
-        'support' => 'Suporte por e-mail',
-        'cta' => 'Começar grátis',
-        'featured' => false,
-    ],
-    [
-        'name' => 'Starter',
-        'price' => 'R$ 49',
-        'caption' => 'Para times pequenos que precisam vender com processo.',
-        'users' => '* R$ 196/mês por 4 usuários  ',
-        'leads' => '10.000 leads',
-        'pipelines' => 'Até 3 pipelines',
-        'dashboards' => '3 dashboards',
-        'support' => 'Suporte por e-mail',
-        'cta' => 'Começar Starter',
-        'featured' => false,
-    ],
-    [
-        'name' => 'Growth',
-        'price' => 'R$ 69',
-        'caption' => 'O plano recomendado para operações em crescimento.',
-        'users' => '* R$ 276/mês por 4 usuários',
-        'leads' => '100.000 leads',
-        'pipelines' => 'Pipelines ilimitados',
-        'dashboards' => '5 dashboards',
-        'support' => 'Suporte prioritário',
-        'cta' => 'Escolher Growth',
-        'featured' => true,
-    ],
-    [
-        'name' => 'Pro',
-        'price' => 'R$ 99',
-        'caption' => 'Para equipes que precisam de automação, API e controle avançado.',
-        'users' => '* R$ 276/mês por 4 usuários',
-        'leads' => 'Leads ilimitados',
-        'pipelines' => 'Pipelines ilimitados',
-        'dashboards' => '8 dashboards',
-        'support' => 'Suporte premium',
-        'cta' => 'Falar com vendas',
-        'featured' => false,
-    ],
-    [
-        'name' => 'Enterprise',
-        'price' => 'Sob consulta',
-        'caption' => 'Para empresas com regras, volume e suporte dedicados.',
-        'users' => 'Mínimo de 10 usuários',
-        'leads' => 'Leads ilimitados',
-        'pipelines' => 'Pipelines ilimitados',
-        'dashboards' => 'Dashboards ilimitados',
-        'support' => 'Suporte dedicado',
-        'cta' => 'Solicitar proposta',
-        'featured' => false,
-    ],
+$budgetPlans = $budgetPlans ?? collect();
+$budgetModules = $budgetModules ?? collect();
+$budgetFeatures = $budgetFeatures ?? collect();
+
+$planOrder = ['free', 'starter', 'growth', 'pro', 'enterprise'];
+$planCtas = [
+    'free' => 'Começar grátis',
+    'starter' => 'Começar Starter',
+    'growth' => 'Escolher Growth',
+    'pro' => 'Falar com vendas',
+    'enterprise' => 'Solicitar proposta',
 ];
 
-$comparisonRows = [
-    ['Usuários - Mínimo', '1', '4', '4', '4', '10'],
-    ['Contatos / Empresas', '500', '10.000', '100.000', 'Ilimitado', 'Ilimitado'],
-    ['Etapas por Pipeline', 'Até 5', 'Até 15', 'Até 25', 'Ilimitadas', 'Ilimitadas'],
-    ['Workspaces', '1', '1', '3', '5', 'Ilimitados'],
-    ['Armazenamento', '0', '5 GB', '20 GB', '100 GB', 'Custom'],
-    ['Automações', '—', '5', '20', '80', 'Ilimitadas'],
-    ['API REST', 'Não', 'Não', 'Não', 'Sim', 'Sim'],
-    ['Webhooks', 'Não', 'Não', 'Até 20', 'Ilimitados', 'Ilimitados'],
-    ['Integrações', 'Não', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Permissões', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Aplicativo Mobile', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
+$planMap = $budgetPlans->keyBy('key');
+$digisacDiscount = $planMap->map(fn ($plan) => (float) ($plan->details['digisac_user_price'] ?? 0))->filter(fn ($value) => $value > 0)->min();
+
+$planos = [];
+foreach ($planOrder as $key) {
+    $plan = $planMap->get($key);
+    if (!$plan) {
+        continue;
+    }
+
+    $details = $plan->details ?? [];
+
+    $priceLabel = is_null($plan->price) ? 'Sob consulta' : 'R$ ' . number_format((float) $plan->price, 0, ',', '.');
+    $monthlySuffix = is_null($plan->price) ? '' : '/usuário mês*';
+    $monthlyNote = '';
+
+    $usersMin = (int) ($details['users_min'] ?? 1);
+    $usersMax = $details['users_max'] ?? null;
+    if ($usersMax !== null && $usersMax !== '') {
+        $usersText = 'Até ' . $usersMax . ' usuários';
+    } elseif ($key === 'enterprise') {
+        $usersText = 'Mínimo de ' . $usersMin . ' usuários';
+    } elseif ($key === 'free') {
+        $usersText = 'Até ' . $usersMin . ' usuários';
+    } else {
+        $usersText = 'A partir de ' . $usersMin . ' usuários';
+    }
+
+    if (!is_null($plan->price) && in_array($key, ['starter', 'growth', 'pro'], true)) {
+        $monthlyTotal = (float) $plan->price * $usersMin;
+        $monthlyNote = '* R$ ' . number_format($monthlyTotal, 0, ',', '.') . '/mês por ' . $usersMin . ' usuários';
+    }
+
+    $leadText = $details['leads'] ?? '—';
+    $pipelineText = $details['pipelines'] ?? '—';
+    $dashboardText = $details['dashboards'] ?? '—';
+    $supportText = $details['support'] ?? '—';
+
+    $normalizeBullet = function ($label, $value) {
+        $text = trim((string) $value);
+        if ($text === '' || $text === '—') {
+            return '—';
+        }
+
+        $lower = mb_strtolower($text);
+        if (str_contains($lower, 'ilimit')) {
+            return match (mb_strtolower($label)) {
+                'leads' => 'Leads ilimitados',
+                'pipelines' => 'Pipelines ilimitados',
+                'dashboards' => 'Dashboards ilimitados',
+                default => $label . ' ilimitados',
+            };
+        }
+
+        $suffix = ((int) $text === 1) ? rtrim($label, 's') : $label;
+        return $text . ' ' . $suffix;
+    };
+
+    $leadLabel = is_numeric(str_replace(['.', ','], '', (string) $leadText)) ? 'leads' : 'leads';
+    $pipelineLabel = is_numeric($pipelineText) ? 'pipeline' : 'pipelines';
+    $dashboardLabel = is_numeric($dashboardText) ? 'dashboard' : 'dashboards';
+    $supportLabel = match (mb_strtolower((string) $supportText)) {
+        'e-mail', 'email' => 'Suporte por e-mail',
+        'prioritário' => 'Suporte prioritário',
+        'premium' => 'Suporte premium',
+        'dedicado' => 'Suporte dedicado',
+        default => 'Suporte ' . $supportText,
+    };
+
+    $planos[] = [
+        'name' => $plan->name,
+        'price' => $priceLabel,
+        'monthly_suffix' => $monthlySuffix,
+        'monthly_note' => $monthlyNote,
+        'users' => $usersText,
+        'features' => [
+            $normalizeBullet('Leads', $leadText),
+            $normalizeBullet('Pipelines', $pipelineText),
+            $normalizeBullet('Dashboards', $dashboardText),
+            $supportLabel,
+        ],
+        'cta' => $planCtas[$key] ?? 'Saiba mais',
+        'featured' => $key === 'growth',
+    ];
+}
+
+$comparisonDefinitions = [
+    ['Usuários - Mínimo', 'users_min'],
+    ['Contatos / Empresas', 'contacts'],
+    ['Etapas por Pipeline', 'pipeline_steps'],
+    ['Workspaces', 'workspaces'],
+    ['Armazenamento', 'storage'],
+    ['Automações', 'automations'],
+    ['API REST', 'api_rest'],
+    ['Webhooks', 'webhooks'],
+    ['Integrações', 'integrations'],
+    ['Permissões', 'permissions'],
+    ['Aplicativo Mobile', 'mobile_app'],
 ];
 
-$featureRows = [
-    ['CRM Kanban', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Cadastro de Leads', 'Não', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Agenda / Calendário', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Atividades', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Feed', 'Não', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Notas', 'Não', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Produtos', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Propostas Comerciais', 'Não', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Tabelas de Preços', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Relatórios', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Campos Personalizados', 'Sim', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['Captura de Leads', 'Não', 'Sim', 'Sim', 'Sim', 'Sim'],
-    ['E-mails', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Forecast', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Metas Comerciais', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Equipes', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Projetos', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Documentos', 'Não', 'Não', 'Sim', 'Sim', 'Sim'],
-    ['Auditoria', 'Não', 'Não', 'Não', 'Sim', 'Sim'],
-    ['API Completa', 'Não', 'Não', 'Não', 'Sim', 'Sim'],
-    ['Multiempresa', 'Não', 'Não', 'Não', 'Sim', 'Sim'],
-    ['Pipeline Analytics', 'Não', 'Não', 'Não', 'Sim', 'Sim'],
-    ['Manual de negócios', 'Não', 'Não', 'Não', 'Sim', 'Sim'],
-];
+$comparisonRows = [];
+foreach ($comparisonDefinitions as [$label, $key]) {
+    $row = [$label];
+    foreach ($planOrder as $planKey) {
+        $plan = $planMap->get($planKey);
+        $value = $plan ? ($plan->details[$key] ?? null) : null;
+        if (is_bool($value)) {
+            $row[] = $value ? 'Sim' : 'Não';
+        } elseif ($value === null || $value === '') {
+            $row[] = '—';
+        } else {
+            $row[] = (string) $value;
+        }
+    }
+    $comparisonRows[] = $row;
+}
+
+$featureRows = [];
+foreach ($budgetFeatures as $feature) {
+    $row = [$feature->name];
+    foreach ($planOrder as $planKey) {
+        $row[] = $feature->plans->contains('key', $planKey) ? 'Sim' : 'Não';
+    }
+    $featureRows[] = $row;
+}
 
 function renderPlanValue($value) {
     if ($value === 'Sim') {
@@ -126,8 +162,8 @@ function renderPlanRow($row) {
     }
     echo '</tr>';
 }
-@endphp
 
+@endphp
 
     <main id="main">
         <section class="planos-pricing" aria-labelledby="planos-title">
@@ -138,6 +174,13 @@ function renderPlanRow($row) {
                     <p class="section-lead">Valores por usuário, cobrados mensalmente. Escolha o plano ideal para sua operação.</p>
                 </div>
 
+                <?php if ($digisacDiscount): ?>
+                    <div class="planos-digisac-box" aria-label="Cliente Digisac">
+                        <span class="planos-digisac-box__badge">Cliente Digisac</span>
+                        <span class="planos-digisac-box__text">Desconto de R$ <?=number_format($digisacDiscount, 2, ',', '.');?> por usuário</span>
+                    </div>
+                <?php endif; ?>
+
                 <div class="planos-grid">
                     <?php foreach ($planos as $plan): ?>
                         <article class="plan-card<?=$plan['featured'] ? ' plan-card--featured' : '';?>">
@@ -146,22 +189,23 @@ function renderPlanRow($row) {
                             <?php endif; ?>
                             <div class="plan-card__head">
                                 <h3 class="plan-card__name"><?=$plan['name'];?></h3>
-                                <p class="plan-card__caption"><?=$plan['caption'];?></p>
+                                <p class="plan-card__caption"><?php if ($plan['featured']): ?>O plano recomendado para operações em crescimento.<?php elseif ($plan['name'] === 'Free'): ?>Para começar a organizar o básico sem custo.<?php elseif ($plan['name'] === 'Starter'): ?>Para times pequenos que precisam vender com processo.<?php elseif ($plan['name'] === 'Pro'): ?>Para equipes que precisam de automação, API e controle avançado.<?php else: ?>Para empresas com regras, volume e suporte dedicados.<?php endif; ?></p>
                             </div>
                             <div class="plan-card__price">
                                 <strong><?=$plan['price'];?></strong>
-                                <?php if ($plan['price'] !== 'Sob consulta'): ?>
-                                    <span>/usuário mês*</span>
+                                <?php if ($plan['monthly_suffix']): ?>
+                                    <span><?=$plan['monthly_suffix'];?></span>
                                 <?php endif; ?>
                             </div>
-                            <?php if (!empty(trim($plan['users']))): ?>
+                            <?php if (!empty(trim($plan['monthly_note']))): ?>
+                                <p class="plan-card__note"><?=trim($plan['monthly_note']);?></p>
+                            <?php elseif (!empty(trim($plan['users']))): ?>
                                 <p class="plan-card__note"><?=trim($plan['users']);?></p>
                             <?php endif; ?>
                             <ul class="plan-card__features">
-                                <li><?=$plan['leads'];?></li>
-                                <li><?=$plan['pipelines'];?></li>
-                                <li><?=$plan['dashboards'];?></li>
-                                <li><?=$plan['support'];?></li>
+                                <?php foreach ($plan['features'] as $feature): ?>
+                                    <li><?=$feature;?></li>
+                                <?php endforeach; ?>
                             </ul>
                             <a href="https://app.digify.com.br/login?signup" class="button <?=$plan['featured'] ? 'button--white' : 'button--outline';?> plan-card__cta"><?=$plan['cta'];?></a>
                         </article>
