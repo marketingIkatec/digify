@@ -310,6 +310,11 @@
         transition: all var(--transition-fast);
     }
 
+    .mini-btn:disabled {
+        opacity: .35;
+        cursor: not-allowed;
+    }
+
     .mini-btn:hover { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary); }
     .mini-val { font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); min-width: 22px; text-align: center; color: var(--color-ink); }
 
@@ -539,14 +544,60 @@ const FEATURES = @json($featuresData);
 
 let scenarios = [], nextId = 0;
 function planMinUsers(plan) {
-  const mins = { free: 1, starter: 4, growth: 4, pro: 4, enterprise: 10 };
-  return mins[plan] || 1;
+  const details = (PLANS[plan] && PLANS[plan].details) ? PLANS[plan].details : {};
+  return Number(details.users_min || 1);
+}
+
+function planMaxUsers(plan) {
+  const details = (PLANS[plan] && PLANS[plan].details) ? PLANS[plan].details : {};
+  const max = details.users_max;
+  return (max === null || max === undefined || max === '') ? null : Number(max);
+}
+
+function planPipelinesUnlimited(plan) {
+  const details = (PLANS[plan] && PLANS[plan].details) ? PLANS[plan].details : {};
+  return String(details.pipelines || '').toLowerCase() === 'ilimitados';
+}
+
+function planInitialCount(plan, key) {
+  if (key === 'pipelines' && planPipelinesUnlimited(plan)) return 0;
+  const details = (PLANS[plan] && PLANS[plan].details) ? PLANS[plan].details : {};
+  const raw = details[key];
+  if (raw === null || raw === undefined || raw === '') return 0;
+  if (typeof raw === 'number') return raw;
+  const text = String(raw).replace(',', '.');
+  const parsed = parseFloat(text);
+  if (Number.isFinite(parsed)) return parsed;
+  const match = text.match(/\d+(?:\.\d+)?/);
+  if (match) return Number(match[0]);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function extraQty(plan, key, value) {
+  return Math.max(0, Number(value || 0) - planInitialCount(plan, key));
+}
+
+function initialPlanUsers(plan) {
+  const max = planMaxUsers(plan);
+  return max !== null ? max : planMinUsers(plan);
 }
 
 function newScenario(name, plan) {
   const initialPlan = plan || 'starter';
-  const initialUsers = planMinUsers(initialPlan);
-  return { id:nextId++, name, plan:initialPlan, users:initialUsers, digisac:false, workspaces:0, pipelines:0, dashboards:0, automations:0, storage:0, modules:{} };
+  const initialUsers = initialPlanUsers(initialPlan);
+  return {
+    id: nextId++,
+    name,
+    plan: initialPlan,
+    users: initialUsers,
+    digisac: false,
+    workspaces: planInitialCount(initialPlan, 'workspaces'),
+    pipelines: planInitialCount(initialPlan, 'pipelines'),
+    dashboards: planInitialCount(initialPlan, 'dashboards'),
+    automations: planInitialCount(initialPlan, 'automations'),
+    storage: planInitialCount(initialPlan, 'storage'),
+    modules: {},
+  };
 }
 function addScenario() {
   if(scenarios.length>=3) return;
@@ -558,14 +609,30 @@ function removeScenario(id) { scenarios=scenarios.filter(s=>s.id!==id); render()
 function duplicateScenario(id) {
   if(scenarios.length>=3) return;
   const dup=JSON.parse(JSON.stringify(scenarios.find(s=>s.id===id)));
-  dup.id=nextId++; dup.name+=' (cópia)'; scenarios.push(dup); render();
+  dup.id=nextId++;
+  dup.name+=' (cópia)';
+  dup.users=initialPlanUsers(dup.plan);
+  dup.workspaces=planInitialCount(dup.plan, 'workspaces');
+  dup.pipelines=planInitialCount(dup.plan, 'pipelines');
+  dup.dashboards=planInitialCount(dup.plan, 'dashboards');
+  dup.automations=planInitialCount(dup.plan, 'automations');
+  dup.storage=planInitialCount(dup.plan, 'storage');
+  scenarios.push(dup);
+  render();
 }
 function calcTotal(sc) {
   const p=PLANS[sc.plan]; if(!p||p.price===null) return null;
-  const ep=EXTRA_PRICES[sc.plan] || {}; const disc=sc.digisac?19:0;
+  const ep=EXTRA_PRICES[sc.plan] || {};
+  const digisacPrice = Number((PLANS[sc.plan].details && PLANS[sc.plan].details.digisac_user_price) || 0);
+  const disc=sc.digisac ? digisacPrice : 0;
   let total=Math.max(0,p.price-disc)*sc.users;
   if(sc.plan!=='free'){
-    total+=(sc.workspaces*(ep.workspaces||0))+(sc.pipelines*(ep.pipelines||0))+(sc.dashboards*(ep.dashboards||0))+(sc.automations*(ep.automations||0))+(sc.storage*(ep.storage||0));
+    const workspaces = extraQty(sc.plan, 'workspaces', sc.workspaces);
+    const pipelines = extraQty(sc.plan, 'pipelines', sc.pipelines);
+    const dashboards = extraQty(sc.plan, 'dashboards', sc.dashboards);
+    const automations = extraQty(sc.plan, 'automations', sc.automations);
+    const storage = extraQty(sc.plan, 'storage', sc.storage);
+    total+=(workspaces*(ep.workspaces||0))+(pipelines*(ep.pipelines||0))+(dashboards*(ep.dashboards||0))+(automations*(ep.automations||0))+(storage*(ep.storage||0));
   }
   MODULES.forEach(m=>{ if(!m.included.includes(sc.plan)&&sc.modules[m.id]&&m.price>0) total+=m.price; });
   return total;
@@ -616,6 +683,44 @@ function detailDisplay(key, value) {
   return detailValue(value);
 }
 
+function compareExtraLabel(value) {
+  if (value === null || value === undefined || value === '') return '—';
+  const text = String(value);
+  if (text.toLowerCase() === 'ilimitados' || text.toLowerCase() === 'ilimitado') return text;
+  if (/^\d+(?:[.,]\d+)?\s*gb$/i.test(text)) return text;
+  const parsed = Number(text);
+  return Number.isFinite(parsed) ? text : text;
+}
+
+function compareStorageLabel(sc) {
+  const value = compareExtraValue(sc, 'storage');
+  if (value === null || value === undefined || value === '') return '—';
+  const text = String(value);
+  return /gb$/i.test(text) ? text : `${text} GB`;
+}
+
+function compareExtraValue(sc, key) {
+  const d = (PLANS[sc.plan] && PLANS[sc.plan].details) ? PLANS[sc.plan].details : {};
+  const raw = d[key];
+  if (key === 'pipelines' && raw !== null && raw !== undefined && raw !== '') {
+    const text = String(raw);
+    if (text.toLowerCase().includes('ilimit')) return raw;
+    if (Number(sc[key]) === planInitialCount(sc.plan, key)) return raw;
+    return sc[key];
+  }
+  return sc[key];
+}
+
+function compareSelectedModules(sc) {
+  const names = [];
+  MODULES.forEach((m) => {
+    if (!m.included.includes(sc.plan) && sc.modules[m.id] && m.price > 0) {
+      names.push(m.name);
+    }
+  });
+  return names.length ? names.join(', ') : '—';
+}
+
 function renderPlanDetails(sc) {
   const d = (PLANS[sc.plan] && PLANS[sc.plan].details) ? PLANS[sc.plan].details : {};
   const keys = ['annual_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipelines', 'pipeline_steps', 'dashboards', 'workspaces', 'storage', 'automations', 'api_rest', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support', 'digisac_user_price'];
@@ -623,10 +728,12 @@ function renderPlanDetails(sc) {
   return `
     <div class="plan-details">
       ${keys.map((key) => `
+        ${(key === 'digisac_user_price' && Number(d[key] || 0) === 0) ? '' : `
         <div class="plan-detail">
           <span class="k">${detailLabel(key)}</span>
           <span class="v">${detailDisplay(key, d[key])}</span>
         </div>
+      `}
       `).join('')}
     </div>
   `;
@@ -646,6 +753,7 @@ function renderColumns() {
   wrap.innerHTML=scenarios.map((sc,idx)=>{
     const total=calcTotal(sc), isWinner=total!==null&&total===minTotal&&totals.length>1;
     const ep=EXTRA_PRICES[sc.plan]||EXTRA_PRICES.starter;
+    const isConsult = PLANS[sc.plan].price === null;
     const planPills=Object.entries(PLANS).map(([k,v])=>`<button class="plan-pill${sc.plan===k?' active':''}" onclick="setPlan(${sc.id},'${k}')">${v.name}</button>`).join('');
     const modChips=MODULES.map(m=>{
       const isIncl=m.included.includes(sc.plan), isAct=sc.modules[m.id];
@@ -654,16 +762,42 @@ function renderColumns() {
       const priceL=isIncl?'✓ incluso':m.price===0?'grátis':fmt(m.price);
       return `<span class="mod-chip ${cls}"${oc} title="${priceL}">${m.name}</span>`;
     }).join('');
-    const disc=sc.digisac?19:0;
+    const digisacPrice = Number((PLANS[sc.plan].details && PLANS[sc.plan].details.digisac_user_price) || 0);
+    const disc=sc.digisac ? digisacPrice : 0;
     const netPPU=Math.max(0,(PLANS[sc.plan].price||0)-disc);
-    let extSub=0;
-    if(sc.plan!=='free') extSub+=(sc.workspaces*(ep.workspaces||0))+(sc.pipelines*(ep.pipelines||0))+(sc.dashboards*(ep.dashboards||0))+(sc.automations*(ep.automations||0))+(sc.storage*(ep.storage||0));
-    let modSub=0; MODULES.forEach(m=>{if(!m.included.includes(sc.plan)&&sc.modules[m.id]&&m.price>0) modSub+=m.price;});
     const totalStr=total===null?'Sob consulta':fmt(total);
-    let bRows=`<div class="sc-breakdown-row"><span>Plano (${sc.users} user${sc.users>1?'s':''} × ${fmt(netPPU)})</span><span class="bv">${fmt(netPPU*sc.users)}</span></div>`;
-    if(sc.digisac) bRows+=`<div class="sc-breakdown-row"><span>Desconto Digisac</span><span class="bv" style="color:var(--green)">−${fmt(disc*sc.users)}</span></div>`;
-    if(extSub>0)   bRows+=`<div class="sc-breakdown-row"><span>Adicionais</span><span class="bv">${fmt(extSub)}</span></div>`;
-    if(modSub>0)   bRows+=`<div class="sc-breakdown-row"><span>Módulos extras</span><span class="bv">${fmt(modSub)}</span></div>`;
+    let bRows = isConsult
+      ? `<div class="sc-breakdown-row"><span>Valor</span><span class="bv">Sob consulta</span></div>`
+      : `<div class="sc-breakdown-row"><span>Plano (${sc.users} user${sc.users>1?'s':''} × ${fmt(netPPU)})</span><span class="bv">${fmt(netPPU*sc.users)}</span></div>`;
+    if(!isConsult && sc.digisac) bRows+=`<div class="sc-breakdown-row"><span>Desconto Digisac</span><span class="bv" style="color:var(--green)">−${fmt(disc*sc.users)}</span></div>`;
+    if(!isConsult && sc.plan!=='free') {
+      const workspaces = extraQty(sc.plan, 'workspaces', sc.workspaces);
+      const pipelines = extraQty(sc.plan, 'pipelines', sc.pipelines);
+      const dashboards = extraQty(sc.plan, 'dashboards', sc.dashboards);
+      const automations = extraQty(sc.plan, 'automations', sc.automations);
+      const storage = extraQty(sc.plan, 'storage', sc.storage);
+      const extSub=(workspaces*(ep.workspaces||0))+(pipelines*(ep.pipelines||0))+(dashboards*(ep.dashboards||0))+(automations*(ep.automations||0))+(storage*(ep.storage||0));
+      if(extSub>0) {
+        const extNames=[];
+        if(workspaces>0) extNames.push(`Workspaces +${workspaces}`);
+        if(pipelines>0) extNames.push(`Pipelines +${pipelines}`);
+        if(dashboards>0) extNames.push(`Dashboards +${dashboards}`);
+        if(automations>0) extNames.push(`Automações +${automations}`);
+        if(storage>0) extNames.push(`Armazenamento +${storage} GB`);
+        bRows+=`<div class="sc-breakdown-row"><span>Adicionais${extNames.length ? `: ${extNames.join(', ')}` : ''}</span><span class="bv">${fmt(extSub)}</span></div>`;
+      }
+    }
+    if(!isConsult) {
+      let modSub=0;
+      const modNames=[];
+      MODULES.forEach(m=>{
+        if(!m.included.includes(sc.plan)&&sc.modules[m.id]&&m.price>0) {
+          modSub+=m.price;
+          modNames.push(m.name);
+        }
+      });
+      if(modSub>0) bRows+=`<div class="sc-breakdown-row"><span>Módulos extras${modNames.length ? `: ${modNames.join(', ')}` : ''}</span><span class="bv">${fmt(modSub)}</span></div>`;
+    }
     const dupStyle=scenarios.length>=3?'display:none':'';
     return `
 <div class="scenario-card sc-color-${idx}${isWinner?' winner':''}">
@@ -683,24 +817,27 @@ function renderColumns() {
     ${renderPlanDetails(sc)}
   </div>
   <div class="sc-body">
+      ${(!isConsult && digisacPrice > 0) ? `
       <div class="digisac-row" onclick="toggleDigisac(${sc.id})">
         <input type="checkbox" ${sc.digisac?'checked':''} onchange="toggleDigisac(${sc.id})" onclick="event.stopPropagation()" />
         <span class="dg-label">Cliente Digisac</span>
-        <span class="dg-disc">−R$ 19/user</span>
-      </div>
+        <span class="dg-disc">−${fmt(digisacPrice)}/user</span>
+      </div>` : ''}
       <div>
+      ${Number(PLANS[sc.plan].price || 0) > 0 ? `
       <div class="cfg-section-title">Usuários e adicionais</div>
-      ${cfgRow(sc,'users','Usuários',ep,planMinUsers(sc.plan))}
-      ${sc.plan!=='free'?cfgRow(sc,'workspaces','Workspaces extras',ep,0):''}
-      ${sc.plan!=='free'?cfgRow(sc,'pipelines','Pipelines extras',ep,0):''}
-      ${sc.plan!=='free'?cfgRow(sc,'dashboards','Dashboards extras',ep,0):''}
-      ${sc.plan!=='free'?cfgRow(sc,'automations','Automações extras',ep,0):''}
-      ${sc.plan!=='free'?cfgRow(sc,'storage','Armazenamento extra (GB)',ep,0):''}
+      ${cfgRow(sc,'users','Usuários',ep,planMinUsers(sc.plan),planMaxUsers(sc.plan))}
+      ${cfgRow(sc,'workspaces','Workspaces extras',ep,planInitialCount(sc.plan, 'workspaces'))}
+      ${planPipelinesUnlimited(sc.plan) ? '' : cfgRow(sc,'pipelines','Pipelines extras',ep,planInitialCount(sc.plan, 'pipelines'))}
+      ${cfgRow(sc,'dashboards','Dashboards extras',ep,planInitialCount(sc.plan, 'dashboards'))}
+      ${cfgRow(sc,'automations','Automações extras',ep,planInitialCount(sc.plan, 'automations'))}
+      ${cfgRow(sc,'storage','Armazenamento extra (GB)',ep,planInitialCount(sc.plan, 'storage'))}` : ''}
     </div>
+    ${Number(PLANS[sc.plan].price || 0) > 0 ? `
     <div>
       <div class="cfg-section-title">Módulos</div>
       <div class="mods-wrap">${modChips}</div>
-    </div>
+    </div>` : ''}
   </div>
   <div class="sc-footer">
     <div class="sc-total-label">Total mensal estimado</div>
@@ -712,11 +849,13 @@ function renderColumns() {
   }).join('');
 }
 
-function cfgRow(sc,key,label,ep,min){
+function cfgRow(sc,key,label,ep,min,max){
   const val=sc[key];
   const unitP=key==='users'?null:(ep[key]||0);
   const pStr=unitP?`${fmt(unitP)}/un`:'';
-  return `<div class="cfg-row"><label>${label}</label><span class="cfg-price">${pStr}</span><div class="mini-stepper"><button class="mini-btn" onclick="changeVal(${sc.id},'${key}',-1,${min})">−</button><span class="mini-val">${val}</span><button class="mini-btn" onclick="changeVal(${sc.id},'${key}',1,${min})">+</button></div></div>`;
+  const disableDown = val <= min;
+  const disableUp = max !== null && max !== undefined && val >= max;
+  return `<div class="cfg-row"><label>${label}</label><span class="cfg-price">${pStr}</span><div class="mini-stepper"><button class="mini-btn" ${disableDown ? 'disabled' : ''} onclick="changeVal(${sc.id},'${key}',-1,${min},${max})">−</button><span class="mini-val">${val}</span><button class="mini-btn" ${disableUp ? 'disabled' : ''} onclick="changeVal(${sc.id},'${key}',1,${min},${max})">+</button></div></div>`;
 }
 
 function renderCompareTable(){
@@ -742,14 +881,15 @@ function renderCompareTable(){
     scenarios.forEach((sc,i)=>{
       if(i===0){h+=`<td><span class="delta-chip delta-zero">referência</span></td>`;return;}
       if(totals[i]===null){h+=`<td>—</td>`;return;}
-      const delta=totals[i]-totals[0], cls=delta>0?'delta-pos':delta<0?'delta-neg':'delta-zero';
-      const sign=delta>0?'+':'';
-      h+=`<td><span class="delta-chip ${cls}">${sign}${fmt(Math.abs(delta)).replace('R$ ',delta>=0?'R$ +':'−R$ ')}</span></td>`;
+       const delta=totals[i]-totals[0], cls=delta>0?'delta-pos':delta<0?'delta-neg':'delta-zero';
+       h+=`<td><span class="delta-chip ${cls}">${delta>0?'+':''}${fmt(Math.abs(delta))}</span></td>`;
     });
     h+=`</tr>`;
   }
   h+=`<tr class="section-row"><td colspan="${cols}">Detalhes do plano</td></tr>`;
-  const detailKeys = ['annual_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipelines', 'pipeline_steps', 'dashboards', 'workspaces', 'storage', 'automations', 'api_rest', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support', 'digisac_user_price'];
+  const digisacVisible = scenarios.some(sc => Number((PLANS[sc.plan].details && PLANS[sc.plan].details.digisac_user_price) || 0) > 0);
+  const detailKeys = ['annual_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipeline_steps', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support'];
+  if (digisacVisible) detailKeys.push('digisac_user_price');
   detailKeys.forEach((key) => {
     h+=`<tr><td>${detailLabel(key)}</td>`;
     scenarios.forEach((sc) => {
@@ -765,14 +905,29 @@ function renderCompareTable(){
   h+=`</tr><tr><td>Desconto Digisac</td>`;
   scenarios.forEach(sc=>{h+=`<td>${sc.digisac?'<span class="check-yes">✓</span>':'<span class="check-no">—</span>'}</td>`;});
   h+=`</tr>`;
+  ['workspaces','pipelines','dashboards','automations','storage'].forEach((key) => {
+    h+=`<tr class="compare-extra-row compare-extra-${key}" id="compare-extra-${key}" data-extra-key="${key}"><td class="compare-extra-label">${detailLabel(key)}</td>`;
+    scenarios.forEach((sc) => {
+      h+=`<td class="compare-extra-value">${key === 'storage' ? compareStorageLabel(sc) : compareExtraLabel(compareExtraValue(sc, key))}</td>`;
+    });
+    h+=`</tr>`;
+  });
   h+=`<tr class="section-row"><td colspan="${cols}">Funcionalidades do plano</td></tr>`;
   FEATURES.forEach(f=>{
+    if (f.label === 'Forecast' || f.label === 'Projetos' || f.label === 'Documentos') return;
     h+=`<tr><td>${f.label}</td>`;
     scenarios.forEach(sc=>{h+=`<td>${f.plans.includes(sc.plan)?'<span class="check-yes">✓</span>':'<span class="check-no">—</span>'}</td>`;});
     h+=`</tr>`;
   });
+  h+=`<tr class="compare-modules-extra-row" id="compare-modules-extra-row"><td class="compare-modules-extra-label">Módulos extras</td>`;
+  scenarios.forEach(sc=>{ h+=`<td class="compare-modules-extra-value">${compareSelectedModules(sc)}</td>`; });
+  h+=`</tr>`;
   h+=`<tr class="section-row"><td colspan="${cols}">Módulos</td></tr>`;
+  const renderedModuleIds = new Set();
   MODULES.forEach(m=>{
+    if (renderedModuleIds.has(m.id)) return;
+    renderedModuleIds.add(m.id);
+    if (m.name === 'Pipeline Analytics' && !scenarios.some(sc => m.included.includes(sc.plan) || sc.modules[m.id])) return;
     h+=`<tr><td>${m.name}</td>`;
     scenarios.forEach(sc=>{
       const isI=m.included.includes(sc.plan), isA=sc.modules[m.id];
@@ -790,13 +945,18 @@ function setPlan(id,plan){
   const sc=scenarios.find(s=>s.id===id);
   if(sc){
     sc.plan=plan;
-    sc.users=Math.max(sc.users, planMinUsers(plan));
+    sc.users=initialPlanUsers(plan);
+    sc.workspaces=planInitialCount(plan, 'workspaces');
+    sc.pipelines=planInitialCount(plan, 'pipelines');
+    sc.dashboards=planInitialCount(plan, 'dashboards');
+    sc.automations=planInitialCount(plan, 'automations');
+    sc.storage=planInitialCount(plan, 'storage');
     render();
   }
 }
 function setName(id,name){const sc=scenarios.find(s=>s.id===id);if(sc){sc.name=name;renderCompareTable();}}
 function toggleDigisac(id){const sc=scenarios.find(s=>s.id===id);if(sc){sc.digisac=!sc.digisac;render();}}
-function changeVal(id,key,delta,min){const sc=scenarios.find(s=>s.id===id);if(sc){sc[key]=Math.max(min,sc[key]+delta);render();}}
+function changeVal(id,key,delta,min,max){const sc=scenarios.find(s=>s.id===id);if(sc){const next=Math.max(min,sc[key]+delta);sc[key]=max !== null && max !== undefined ? Math.min(max,next) : next;render();}}
 function toggleMod(id,modId){const sc=scenarios.find(s=>s.id===id);if(sc){sc.modules[modId]=!sc.modules[modId];render();}}
 
 scenarios.push(newScenario('Cenário A','starter'));
