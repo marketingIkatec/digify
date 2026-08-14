@@ -8,6 +8,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 app: "resources/css/app.css",
+                main: "resources/css/main.css",
                 app_admin: "resources/css/app.admin.css",
                 app_blog: "resources/css/app.blog.css",
                 app_colorbox: "resources/css/app.colorbox.css",
@@ -28,6 +29,7 @@ export default defineConfig({
         laravel({
             input: [
                 "resources/css/app.css",
+                "resources/css/main.css",
                 "resources/js/app.js",
                 "resources/css/app.admin.css",
                 "resources/css/app.blog.css",
