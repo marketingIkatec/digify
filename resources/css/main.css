@@ -256,6 +256,10 @@ section {
 /* base/typography.css
    Escala tipográfica base. Toda a interface usa Plus Jakarta Sans. */
 
+/* text-wrap: os títulos usam `balance`, que distribui as palavras em linhas de
+   comprimento parecido em vez de encher a primeira e deixar uma sobra curta na
+   última. Vale só para blocos curtos (o navegador desiste depois de ~6 linhas),
+   que é exatamente o caso de um título. */
 h1,
 h2,
 h3,
@@ -263,6 +267,7 @@ h4 {
   font-family: var(--font-family-display);
   line-height: var(--line-height-tight);
   letter-spacing: -0.02em;
+  text-wrap: balance;
   color: var(--color-ink);
 }
 
@@ -285,6 +290,30 @@ h3 {
 h4 {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
+}
+
+/* `pretty` só mexe nas últimas linhas: o navegador puxa uma palavra da linha
+   anterior para a última não ficar com uma palavra sozinha (a "viúva"). Ao
+   contrário de `balance`, não tem limite de linhas, então serve para parágrafo
+   corrido. Onde não houver suporte, cai na quebra normal — nada quebra. */
+p,
+li,
+figcaption,
+blockquote,
+dd {
+  text-wrap: pretty;
+}
+
+/* Legendas de card têm duas ou três linhas, e nessa escala o `pretty` do
+   Chrome ainda aceita uma última linha curta ("...leads por / responsável.").
+   `balance` iguala as linhas e resolve — só serve aqui porque são blocos
+   curtos; em parágrafo corrido ele deixaria a mancha estreita demais. */
+.feature-item__text,
+.perf-point__text,
+.segment-card__text,
+.timeline__desc,
+.recurso-media p {
+  text-wrap: balance;
 }
 
 p {
@@ -1264,9 +1293,18 @@ p {
   max-width: 590px;
 }
 
+/* Linha única: as três provas são curtas e lidas em conjunto, quebrar deixava
+   uma solta embaixo. Só `nowrap` não bastava — entre 1060px e ~1200px a coluna
+   do hero encolhe e a linha estourava. Virando container de consulta, texto e
+   respiro passam a ser medidos pela largura da própria coluna: no desktop os
+   valores batem no teto e nada muda; na faixa apertada eles cedem o suficiente
+   para caber. */
 .hero__proof {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  container-type: inline-size;
+  /* O gap fica fixo de propósito: um elemento não consulta o próprio
+     container, então cqw aqui mediria o ancestral, não esta linha. */
   gap: var(--space-5);
   margin-top: var(--space-8);
 }
@@ -1275,9 +1313,23 @@ p {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--font-size-sm);
+  font-size: min(var(--font-size-sm), 2.6cqw);
   font-weight: var(--font-weight-medium);
+  white-space: nowrap;
   color: var(--color-text-secondary);
+}
+
+/* No celular a coluna é estreita demais para caber sem miniaturizar o texto:
+   aí é melhor quebrar do que ficar ilegível. */
+@media (max-width: 560px) {
+  .hero__proof {
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .hero__proof-item {
+    font-size: var(--font-size-sm);
+  }
 }
 
 .hero__proof-check {
@@ -1648,6 +1700,37 @@ p {
   background: var(--color-rose);
 }
 
+/* Alternativa ao ponto colorido: chip de ícone, para quando o card precisa
+   dizer de que tipo de informação está falando. Mesma paleta dos pontos. */
+.perf-point__icon {
+  display: grid;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+}
+
+.perf-point__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.perf-point__icon--mint {
+  color: var(--color-mint);
+}
+
+.perf-point__icon--amber {
+  color: var(--color-amber);
+}
+
+.perf-point__icon--rose {
+  color: var(--color-rose);
+}
+
 .perf-point__title {
   display: block;
   margin-bottom: 4px;
@@ -1657,7 +1740,10 @@ p {
   color: var(--color-white);
 }
 
+/* `display: block` não é só estético: text-wrap age no container de bloco,
+   e como <span> inline ele ficava fora do alcance do `pretty`. */
 .perf-point__text {
+  display: block;
   font-size: var(--font-size-xs);
   line-height: 1.55;
   color: var(--color-dark-text-muted);
@@ -2122,6 +2208,32 @@ p {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
+}
+
+/* Alternativa ao parágrafo: os mesmos dados como itens marcáveis, quando a
+   frase era só uma enumeração separada por vírgula. */
+.segment-card__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.segment-card__list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.segment-card__list svg {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--color-primary);
 }
 
 .segment-card__text {
@@ -3435,7 +3547,8 @@ p {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .recurso-hero__float {
+  .recurso-hero__float,
+  .shot-balloon {
     animation: none;
   }
 }
@@ -3526,10 +3639,13 @@ p {
 }
 
 /* Box único reunindo screenshot + checklist como um elemento só, centralizado */
+/* A segunda coluna é uma lista curta de rótulos: em fração ela sobrava uns
+   190px de vazio à direita. Com max-content ela encolhe até o maior rótulo e
+   a folga vai toda para o screenshot, que é largo (1146x540). */
 .recurso-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
-  gap: var(--space-8);
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: var(--space-10);
   align-items: center;
   max-width: 1160px;
   margin-inline: auto;
@@ -3551,6 +3667,515 @@ p {
 
 .recurso-panel .form-feats {
   margin-top: 0;
+}
+
+/* ===== Histórico do lead (linha do tempo em vetor) =====
+   Sem casco: nada de fundo, borda ou sombra no .timeline — só os cartões de
+   atividade têm moldura, como no produto. */
+.timeline {
+  --tl-icon: 44px;
+  --tl-gap: var(--space-4);
+}
+
+.timeline__tabs {
+  display: flex;
+  gap: var(--space-8);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.timeline__tab {
+  padding-bottom: var(--space-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+  /* Compensa o 1px da régua para o sublinhado da aba ativa cobri-la */
+  margin-bottom: -1px;
+}
+
+.timeline__tab.is-active {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  border-bottom-color: var(--color-primary);
+}
+
+.timeline__day {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.timeline__day:first-of-type {
+  margin-top: 0;
+}
+
+/* O trilho vertical vai do centro do primeiro ícone ao do último; por isso os
+   recuos são metade do ícone. Cada dia tem a sua própria lista, então o
+   trilho quebra nos marcos de data — igual ao produto. */
+.timeline__list {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline__list::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--tl-icon) / 2);
+  bottom: calc(var(--tl-icon) / 2);
+  left: calc(var(--tl-icon) / 2 - 1px);
+  width: 2px;
+  background: var(--color-border);
+}
+
+.timeline__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--tl-icon) minmax(0, 1fr);
+  gap: var(--tl-gap);
+  align-items: start;
+}
+
+.timeline__icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: var(--tl-icon);
+  height: var(--tl-icon);
+  place-items: center;
+  border-radius: 50%;
+}
+
+.timeline__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Gancho entre o ícone e o cartão: um traço curto mais o anel vazado que
+   encosta na borda esquerda do cartão. */
+.timeline__icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: var(--tl-gap);
+  height: 2px;
+  background: var(--color-border);
+  transform: translateY(-1px);
+}
+
+.timeline__icon--meeting {
+  color: #2563eb;
+  background: #e4edff;
+}
+
+.timeline__icon--owner {
+  color: #7c4dff;
+  background: #efe9ff;
+}
+
+.timeline__icon--call {
+  color: #16a34a;
+  background: #e0f6e9;
+}
+
+.timeline__icon--task {
+  color: #2563eb;
+  background: #e4edff;
+}
+
+.timeline__icon--note {
+  color: #f59e0b;
+  background: #fff1da;
+}
+
+.timeline__icon--edit {
+  color: #22a6d8;
+  background: #ddf2fb;
+}
+
+.timeline__icon--stage {
+  color: #7c4dff;
+  background: #efe9ff;
+}
+
+.timeline__icon--next {
+  color: #22a6d8;
+  background: #ddf2fb;
+}
+
+.timeline__card {
+  position: relative;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+/* Anel do gancho, alinhado ao centro do ícone (e não ao do cartão, que muda
+   de altura conforme o texto). */
+.timeline__card::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--tl-icon) / 2);
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.timeline__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.timeline__title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.timeline__badge {
+  flex-shrink: 0;
+  padding: 4px var(--space-3);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: #16a34a;
+  background: #e9f8ef;
+  border: 1px solid #c6e9d4;
+  border-radius: var(--radius-pill);
+}
+
+/* Selo do que ainda vai acontecer (agendado), em azul em vez de verde. */
+.timeline__badge--soft {
+  color: #2563eb;
+  background: #e8efff;
+  border-color: #cadcff;
+}
+
+.timeline__desc {
+  margin: 6px 0 0;
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.timeline__meta {
+  margin: 6px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Variante escura (dobra "Histórico de interações" do CRM). Os cartões viram
+   véus translúcidos em vez de branco sólido, e os círculos de ícone trocam o
+   pastel por um tom claro que ainda contrasta com o fundo escuro. */
+.recurso-block--dark .timeline__tabs {
+  border-bottom-color: var(--color-dark-border);
+}
+
+.recurso-block--dark .timeline__tab {
+  color: var(--color-dark-text-muted);
+}
+
+.recurso-block--dark .timeline__tab.is-active {
+  color: var(--color-white);
+  border-bottom-color: var(--color-accent);
+}
+
+.recurso-block--dark .timeline__day {
+  color: var(--color-white);
+}
+
+.recurso-block--dark .timeline__list::before,
+.recurso-block--dark .timeline__icon::after {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.recurso-block--dark .timeline__card {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* O anel precisa do fundo opaco da seção para cobrir o trilho por baixo. */
+.recurso-block--dark .timeline__card::before {
+  background: var(--color-dark-bg);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.recurso-block--dark .timeline__title {
+  color: var(--color-white);
+}
+
+.recurso-block--dark .timeline__desc {
+  color: var(--color-dark-text);
+}
+
+.recurso-block--dark .timeline__meta {
+  color: var(--color-dark-text-muted);
+}
+
+.recurso-block--dark .timeline__icon--meeting,
+.recurso-block--dark .timeline__icon--task {
+  color: #8ab0ff;
+  background: rgba(138, 176, 255, 0.16);
+}
+
+.recurso-block--dark .timeline__icon--owner,
+.recurso-block--dark .timeline__icon--stage {
+  color: #b39bff;
+  background: rgba(179, 155, 255, 0.16);
+}
+
+.recurso-block--dark .timeline__icon--call {
+  color: #5fd99a;
+  background: rgba(95, 217, 154, 0.16);
+}
+
+.recurso-block--dark .timeline__icon--note {
+  color: #ffc861;
+  background: rgba(255, 200, 97, 0.16);
+}
+
+.recurso-block--dark .timeline__icon--edit,
+.recurso-block--dark .timeline__icon--next {
+  color: #6cd0f0;
+  background: rgba(108, 208, 240, 0.16);
+}
+
+.recurso-block--dark .timeline__badge {
+  color: #7ee2ab;
+  background: rgba(126, 226, 171, 0.14);
+  border-color: rgba(126, 226, 171, 0.3);
+}
+
+.recurso-block--dark .timeline__badge--soft {
+  color: #8ab0ff;
+  background: rgba(138, 176, 255, 0.14);
+  border-color: rgba(138, 176, 255, 0.3);
+}
+
+/* Coluna estreita: o selo desce para debaixo do título em vez de espremê-lo. */
+@media (max-width: 520px) {
+  .timeline {
+    --tl-icon: 38px;
+    --tl-gap: var(--space-3);
+  }
+
+  .timeline__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .timeline__tabs {
+    gap: var(--space-5);
+  }
+}
+
+/* ===== Carrossel de imagens =====
+   Um slide por vez, deslizando por translateX. Sem JS o track continua sendo
+   uma lista rolável na horizontal, então os slides seguem alcançáveis. */
+.slider {
+  --slider-index: 0;
+}
+
+.slider__viewport {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.slider__track {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: transform 0.45s var(--ease);
+  transform: translateX(calc(var(--slider-index) * -100%));
+}
+
+.slider__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+/* Moldura de proporção fixa: os slides não mudam de altura ao trocar. O 16:9
+   acompanha os recortes de 678x382 (1,775), então a imagem preenche o quadro
+   sem tarja; outra proporção entraria com contain, sem cortar. */
+.slider__frame {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.slider__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.slider__caption {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  color: var(--color-ink);
+}
+
+.slider__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.slider__arrow {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+.slider__arrow:hover {
+  border-color: var(--color-border-hi);
+  background: var(--color-bg);
+}
+
+.slider__arrow svg {
+  width: 17px;
+  height: 17px;
+}
+
+.slider__dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.slider__dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  background: var(--color-border);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    width 0.25s var(--ease),
+    background-color 0.25s var(--ease);
+}
+
+.slider__dot.is-active {
+  width: 24px;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+}
+
+.slider__arrow:focus-visible,
+.slider__dot:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider__track {
+    transition: none;
+  }
+}
+
+/* ===== Card flutuante ancorado na base de uma imagem =====
+   Fica no fluxo e sobe por margem negativa, não por posicionamento absoluto:
+   assim a sobreposição não depende da altura do card (que muda com a quebra
+   do texto) e a coluna reserva sozinha o espaço que ele ocupa. A margem é em
+   %, que resolve pela LARGURA do casco — como a altura da imagem também
+   escala com a largura, a mordida fica sempre dentro da faixa transparente
+   do rodapé do PNG. */
+.recurso-split__visual--float {
+  display: flex;
+  flex-direction: column;
+}
+
+.media-float {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: -2% var(--space-6) 0;
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 18px 40px rgba(13, 27, 53, 0.16);
+  animation: floatY 7s ease-in-out infinite;
+}
+
+.media-float__icon {
+  display: grid;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--color-white);
+  background: var(--gradient-brand);
+  border-radius: 50%;
+}
+
+.media-float__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-float {
+    animation: none;
+  }
+}
+
+/* Foto no topo do card (vendedor/gestor). O PNG tem fundo transparente e base
+   esmaecida, então entra sem borda e sem raio — a sombra sai do drop-shadow.
+   Sem teto de largura: a foto ocupa a caixa de conteúdo inteira, então o
+   respiro até a borda do card é o próprio padding dele — igual em cima e nas
+   laterais. Quem define esse respiro é o padding do .planos-highlight. */
+.planos-highlight__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 var(--space-5);
+  filter: drop-shadow(0 14px 30px rgba(13, 27, 53, 0.14));
+}
+
+.planos-highlight--dark .planos-highlight__photo {
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.35));
 }
 
 /* Chip de ícone reutilizável nas dobras (funciona em fundo claro e escuro) */
@@ -3580,7 +4205,8 @@ p {
 
 /* Par de cards mais estreito, para o texto quebrar em duas linhas */
 .recurso-duo-cards {
-  max-width: 800px;
+  gap: var(--space-10);
+  max-width: 880px;
   margin-inline: auto;
 }
 
@@ -3657,10 +4283,13 @@ p {
 }
 
 /* Foto dentro do card: o PNG tem cantos transparentes e base esmaecida,
-   então entra sem borda, sem raio e sem sombra. */
+   então entra sem borda, sem raio e sem sombra. O teto em % segura a foto
+   quando a coluna encolhe (entre 900px e ~1100px o split fica estreito e,
+   com largura fixa, sobrava um filete para o texto ao lado). */
 .recurso-stack__photo {
   flex-shrink: 0;
-  width: 240px;
+  width: 290px;
+  max-width: 57%;
   height: auto;
 }
 
@@ -3681,37 +4310,110 @@ p {
   height: auto;
 }
 
-/* Card reunindo imagem e texto num só bloco (modais de tags / campos) */
-.recurso-media {
-  padding: var(--space-6);
+/* Composição panorâmica: o teto de 900px do --bare deixaria o texto miúdo
+   dentro da imagem. Aqui ela ocupa a largura toda do container. */
+.recurso-showcase--wide {
+  max-width: none;
+}
+
+/* Texto que fecha o raciocínio logo abaixo do screenshot. */
+.recurso-showcase__note {
   text-align: center;
+}
+
+/* Casco do screenshot que hospeda balões flutuantes ancorados em pontos
+   da própria imagem. É um container de consulta: o balão dimensiona texto
+   e respiro em cqw, então encolhe junto com a imagem e as coordenadas em %
+   continuam caindo no mesmo ponto da tela em qualquer largura. */
+.recurso-showcase--anchored {
+  position: relative;
+  container-type: inline-size;
+  margin-bottom: var(--space-8);
+}
+
+/* Balão apontando para um elemento dentro do screenshot. As coordenadas
+   ficam na classe modificadora (uma por ponto ancorado). */
+.shot-balloon {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  padding: 2.2cqw 2.6cqw;
+  font-size: 1.45cqw;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  text-align: left;
+  color: var(--color-ink);
   background: var(--color-white);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition:
-    border-color 0.25s,
-    box-shadow 0.25s,
-    transform 0.25s var(--ease);
+  border-radius: var(--radius-md);
+  box-shadow: 0 18px 40px rgba(13, 27, 53, 0.28);
+  animation: floatY 7s ease-in-out infinite;
 }
 
-.recurso-media:hover {
-  border-color: var(--color-border-hi);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
+/* Rabicho: quadrado girado 45° com a mesma borda/fundo do balão, e um
+   segundo quadrado sólido por cima escondendo a linha de junção. */
+.shot-balloon::before,
+.shot-balloon::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  transform: rotate(45deg);
 }
 
-/* O PNG já é um card de cantos arredondados com fundo transparente: sem
-   borda e sem box-shadow (que seriam retangulares). A sombra vem de
-   drop-shadow, que acompanha o alpha — mesmo recurso do .home-hero__card —
-   e é o que separa o modal branco do card branco. */
+.shot-balloon::before {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+}
+
+.shot-balloon::after {
+  background: var(--color-white);
+}
+
+/* Aponta para o botão "Importar CSV" (≈70% x, ≈28% y da imagem):
+   o balão ocupa a área vazia do card à esquerda do botão e o rabicho
+   sai pela direita, na mesma altura. */
+/* A centralização usa a propriedade `translate` (e não `transform`) porque
+   a animação floatY já ocupa o `transform` — usar as duas em `transform`
+   faria a animação sobrescrever o -50%. */
+.shot-balloon--csv {
+  top: 29%;
+  right: 39.5%;
+  width: 30%;
+  translate: 0 -50%;
+}
+
+.shot-balloon--csv::before,
+.shot-balloon--csv::after {
+  top: 50%;
+  margin-top: -7px;
+}
+
+.shot-balloon--csv::before {
+  right: -8px;
+}
+
+.shot-balloon--csv::after {
+  right: -4px;
+}
+
+/* Imagem e texto empilhados (modais de tags / campos). Sem moldura: o PNG já
+   é um card branco de cantos arredondados, e envolvê-lo num card branco só
+   produzia um retângulo em volta de outro. */
+.recurso-media {
+  text-align: center;
+}
+
+/* A sombra vem de drop-shadow, não de box-shadow: ela acompanha o alpha do
+   PNG e os cantos arredondados, em vez de desenhar um retângulo. É o que
+   separa o modal branco do fundo claro da seção. */
 .recurso-media > img {
   display: block;
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
   height: auto;
   margin: 0 auto var(--space-6);
-  filter: drop-shadow(0 14px 30px rgba(13, 27, 53, 0.14));
+  filter: drop-shadow(0 18px 40px rgba(13, 27, 53, 0.16));
 }
 
 .recurso-media h3 {
@@ -3723,12 +4425,6 @@ p {
   font-size: var(--font-size-md);
   line-height: 1.7;
   color: var(--color-text-secondary);
-}
-
-/* Destaque de uma única frase (usa .privacy-notice como card) */
-.recurso-callout {
-  max-width: 760px;
-  margin-inline: auto;
 }
 
 /* Duas colunas: texto de um lado, screenshot do outro */
@@ -3773,9 +4469,239 @@ p {
   margin-inline: auto;
 }
 
-/* Parágrafo de fecho depois de uma lista ou grade */
+/* ===== Medidor de potencial do lead =====
+   Espelha o checklist da coluna ao lado: o JS só troca o ângulo do ponteiro,
+   o preenchimento do arco, os números e o data-band. Sem JS o markup já entra
+   renderizado no estado inicial, então o bloco continua legível. */
+.gauge {
+  --gauge-cold: #f4556d;
+  --gauge-warm: #ffb01f;
+  --gauge-hot: #10cfa0;
+  /* Cor da faixa atual — o JS troca [data-band] e tudo que depende dela segue */
+  --gauge-active: var(--gauge-warm);
+
+  max-width: 420px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-6) var(--space-7);
+  text-align: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.gauge[data-band="cold"] {
+  --gauge-active: var(--gauge-cold);
+}
+
+.gauge[data-band="hot"] {
+  --gauge-active: var(--gauge-hot);
+}
+
+.gauge__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gauge__track {
+  fill: none;
+  stroke: var(--color-bg);
+  stroke-width: 32;
+  stroke-linecap: round;
+}
+
+/* Arco preenchido: um traço só, pintado com o degradê que segue a curva e
+   recortado pelo dashoffset (0 = cheio, 100 = vazio, graças ao pathLength). */
+.gauge__fill {
+  fill: none;
+  stroke: url(#gaugeRamp);
+  stroke-width: 32;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.55s var(--ease);
+}
+
+.gauge__edge {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gauge__edge--cold {
+  stroke: #7fb4ff;
+}
+
+.gauge__edge--hot {
+  stroke: #ff8a3d;
+}
+
+.gauge__needle {
+  stroke: var(--color-ink);
+  stroke-width: 11;
+  stroke-linecap: round;
+  transition: transform 0.55s var(--ease);
+}
+
+.gauge__hub {
+  fill: var(--color-ink);
+}
+
+.gauge__hub-dot {
+  fill: rgba(255, 255, 255, 0.22);
+}
+
+.gauge__readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-3) 0 0;
+}
+
+.gauge__score {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  line-height: 1;
+  color: var(--gauge-active);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s var(--ease);
+}
+
+.gauge__status {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.gauge__count {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+}
+
+.gauge__legend {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.gauge__legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  transition:
+    color 0.25s var(--ease),
+    background-color 0.25s var(--ease);
+}
+
+.gauge__legend-item.is-active {
+  color: var(--color-ink);
+  background: var(--color-bg);
+}
+
+.gauge__dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 0.4;
+  transition: opacity 0.25s var(--ease);
+}
+
+.gauge__legend-item.is-active .gauge__dot {
+  opacity: 1;
+}
+
+.gauge__legend-item--cold .gauge__dot {
+  background: var(--gauge-cold);
+}
+
+.gauge__legend-item--warm .gauge__dot {
+  background: var(--gauge-warm);
+}
+
+.gauge__legend-item--hot .gauge__dot {
+  background: var(--gauge-hot);
+}
+
+/* Critério clicável: reaproveita .form-feat, mas o .fi vira a caixa de marcação
+   (vazia = contorno, marcada = azul cheio) e o input real fica escondido, só
+   acessível pelo teclado — o clique chega nele pelo próprio <label>. */
+/* O respiro vertical existe para o alvo de toque passar de 30px para ~46px;
+   a margem negativa devolve o texto ao alinhamento dos parágrafos acima. */
+.form-feat--check {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  margin-inline: calc(var(--space-3) * -1);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+.form-feat--check:hover {
+  color: var(--color-ink);
+  background: var(--color-bg);
+}
+
+.form-feat__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-feat--check .fi {
+  color: var(--color-border);
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  transition:
+    color 0.2s var(--ease),
+    background-color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+
+.form-feat--check:hover .fi {
+  border-color: var(--color-border-hi);
+}
+
+.form-feat__input:checked ~ .fi {
+  color: var(--color-white);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.form-feat__input:focus-visible ~ .fi {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gauge__fill,
+  .gauge__needle {
+    transition: none;
+  }
+}
+
+/* Parágrafo de fecho depois de uma lista ou grade. Os 720px são os mesmos do
+   .section-title e do .section-lead: a coluna de leitura da home. */
 .recurso-note {
-  max-width: 760px;
+  max-width: 720px;
   margin: var(--space-10) auto 0;
   font-size: var(--font-size-lg);
   line-height: 1.75;
@@ -3798,13 +4724,16 @@ p {
 }
 
 /* Fluxo de etapas: Cadastro → Qualificação → Distribuição → ... */
+/* O teto é o que segura o fluxo numa linha só: com ícones nas pastilhas os
+   cinco passos pedem ~950px, e em 940px a última caía sozinha embaixo. Os
+   fluxos sem ícone continuam centralizados e mais estreitos que o teto. */
 .recurso-flow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  max-width: 940px;
+  max-width: 1040px;
   margin-inline: auto;
 }
 
@@ -3891,6 +4820,27 @@ p {
   }
 }
 
+/* Abaixo disso o texto do balão ficaria pequeno demais para ser lido: ele
+   sai da imagem, perde o rabicho e volta ao fluxo como legenda acima da tela. */
+@media (max-width: 900px) {
+  .shot-balloon {
+    position: static;
+    width: auto;
+    max-width: 520px;
+    margin: 0 auto var(--space-5);
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--font-size-sm);
+    translate: none;
+    text-align: center;
+    animation: none;
+  }
+
+  .shot-balloon::before,
+  .shot-balloon::after {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .recurso-split {
     grid-template-columns: 1fr;
@@ -3942,8 +4892,11 @@ p {
     align-items: flex-start;
   }
 
+  /* Empilhado, a foto ocupa a largura toda: o teto em % só existe para o
+     layout lado a lado, onde ela disputa espaço com o texto. */
   .recurso-stack__photo {
     width: 100%;
+    max-width: none;
   }
 
   .recurso-flow {

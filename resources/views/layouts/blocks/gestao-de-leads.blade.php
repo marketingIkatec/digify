@@ -1,5 +1,5 @@
 ﻿@php
-$page = getPageById(6); //Planos
+    $page = getPageById(6); //Planos
 @endphp
 <link rel="stylesheet" href="/build/assets/main.css">
 <main id="main">
@@ -106,24 +106,14 @@ $page = getPageById(6); //Planos
             <div class="section-head--center">
                 <span class="section-label">Importação de contatos</span>
                 <h2 class="section-title" id="leads-importacao-title">Traga sua base para a Digify</h2>
-                <p class="section-lead"><em>Importe contatos já existentes e reduza o trabalho de cadastrar cada lead manualmente.</em></p>
-                <p class="section-lead">Essa opção facilita a migração de planilhas e ajuda a começar com as informações comerciais que sua empresa já possui.</p>
             </div>
 
-            <div class="recurso-showcase recurso-showcase--bare">
+            <div class="recurso-showcase recurso-showcase--bare recurso-showcase--anchored">
+                <p class="shot-balloon shot-balloon--csv">Importe contatos já existentes e reduza o trabalho de cadastrar cada lead manualmente.</p>
                 <img src="{{asset('storage/site/leads-importar-contatos.png')}}" alt="Lista de pessoas do Digify com a ação de importar CSV e cadastrar novo contato" width="1697" height="897" loading="lazy">
             </div>
 
-            <div class="segments__grid recurso-duo-cards">
-                <div class="perf-point">
-                    <span class="recurso-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>
-                    <span><strong class="perf-point__title">Antes</strong><span class="perf-point__text">Contatos espalhados em arquivos e controles diferentes.</span></span>
-                </div>
-                <div class="perf-point">
-                    <span class="recurso-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
-                    <span><strong class="perf-point__title">Depois</strong><span class="perf-point__text">Leads reunidos e prontos para serem distribuídos e acompanhados.</span></span>
-                </div>
-            </div>
+            <p class="section-lead recurso-showcase__note">Essa opção facilita a migração de planilhas e ajuda a começar com as informações comerciais que sua empresa já possui.</p>
         </div>
     </section>
 
@@ -180,31 +170,40 @@ $page = getPageById(6); //Planos
                 <p class="section-lead">Registre as informações levantadas durante o contato e diferencie quem ainda precisa ser trabalhado de quem já demonstra interesse em avançar.</p>
                 <p class="section-lead">A qualificação ajuda o vendedor a direcionar tempo e abordagem de acordo com o perfil de cada lead.</p>
 
+                <!-- Checklist que controla o medidor ao lado: cada critério
+                        marcado empurra o ponteiro. Sem JS continuam sendo seis
+                        caixas comuns, marcáveis, só sem o medidor reagindo. -->
                 <div class="form-feats recurso-feats-2col">
-                    <div class="form-feat">
-                        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <label class="form-feat form-feat--check">
+                        <input class="form-feat__input" type="checkbox" data-gauge-check checked>
+                        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                         <span>Necessidade</span>
-                    </div>
-                    <div class="form-feat">
-                        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </label>
+                    <label class="form-feat form-feat--check">
+                        <input class="form-feat__input" type="checkbox" data-gauge-check checked>
+                        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                         <span>Interesse</span>
-                    </div>
-                    <div class="form-feat">
-                        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </label>
+                    <label class="form-feat form-feat--check">
+                        <input class="form-feat__input" type="checkbox" data-gauge-check checked>
+                        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                         <span>Momento de compra</span>
-                    </div>
-                    <div class="form-feat">
-                        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </label>
+                    <label class="form-feat form-feat--check">
+                        <input class="form-feat__input" type="checkbox" data-gauge-check checked>
+                        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                         <span>Perfil da empresa</span>
-                    </div>
-                    <div class="form-feat">
-                        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </label>
+                    <label class="form-feat form-feat--check">
+                        <input class="form-feat__input" type="checkbox" data-gauge-check>
+                        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                         <span>Aderência à solução</span>
-                    </div>
-                    <div class="form-feat">
-                        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </label>
+                    <label class="form-feat form-feat--check">
+                        <input class="form-feat__input" type="checkbox" data-gauge-check>
+                        <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                         <span>Próximo passo</span>
-                    </div>
+                    </label>
                 </div>
 
                 <div class="recurso-actions">
@@ -213,7 +212,62 @@ $page = getPageById(6); //Planos
             </div>
 
             <div class="recurso-split__visual">
-                <img class="recurso-split__bare recurso-split__bare--compact" src="{{asset('storage/site/leads-qualificacao-medidor.png')}}" alt="Medidor de potencial do lead no Digify, do frio ao quente, com três faixas: precisa ser trabalhado, demonstra interesse e pronto para avançar" width="936" height="981" loading="lazy">
+                <!-- Medidor: espelha o checklist ao lado. Sem JS fica estático
+                        no estado inicial do markup (4 de 6 critérios). -->
+                <div class="gauge" data-gauge data-band="warm" data-gauge-unit="critérios marcados">
+                    <!-- Arco de raio 140 centrado em (200,200): 0 = 180°, 100 = 0°.
+                            pathLength="100" faz o dasharray falar direto em pontos,
+                            sem precisar do comprimento real (π × 140). -->
+                    <svg class="gauge__svg" viewBox="0 0 400 258" aria-hidden="true" focusable="false">
+                        <defs>
+                            <!-- Degradê horizontal em coordenadas do próprio SVG. Como
+                                    x = 200 + 140·cos(θ), cada parada foi posicionada no x
+                                    do valor que ela representa — assim a cor acompanha a
+                                    curva e não a projeção reta do arco. -->
+                            <linearGradient id="gaugeRamp" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="340" y2="0">
+                                <stop offset="0" stop-color="#f4556d"/>
+                                <stop offset="0.2455" stop-color="#f4556d"/>
+                                <stop offset="0.3681" stop-color="#fa8346"/>
+                                <stop offset="0.5" stop-color="#ffb01f"/>
+                                <stop offset="0.7545" stop-color="#ffb01f"/>
+                                <stop offset="0.8536" stop-color="#88c060"/>
+                                <stop offset="0.9304" stop-color="#10cfa0"/>
+                                <stop offset="1" stop-color="#10cfa0"/>
+                            </linearGradient>
+                        </defs>
+
+                        <path class="gauge__track" d="M60 200A140 140 0 0 1 340 200"/>
+                        <path class="gauge__fill" data-gauge-fill pathLength="100" stroke-dasharray="100" stroke-dashoffset="33" d="M60 200A140 140 0 0 1 340 200"/>
+
+                        <g class="gauge__edge gauge__edge--cold" transform="translate(44 222) scale(1.15)">
+                            <line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/>
+                            <path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/>
+                            <path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>
+                        </g>
+                        <g class="gauge__edge gauge__edge--hot" transform="translate(328 222) scale(1.15)">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                        </g>
+
+                        <line class="gauge__needle" data-gauge-needle x1="200" y1="200" x2="316" y2="200" transform="rotate(-59.4 200 200)"/>
+                        <circle class="gauge__hub" cx="200" cy="200" r="26"/>
+                        <circle class="gauge__hub-dot" cx="200" cy="200" r="10"/>
+                    </svg>
+
+                    <p class="gauge__readout" aria-live="polite">
+                        <strong class="gauge__score" data-gauge-score>67</strong>
+                        <span class="gauge__status" data-gauge-status>Demonstra interesse</span>
+                        <span class="gauge__count" data-gauge-count>4 de 6 critérios marcados</span>
+                    </p>
+
+                    <!-- As faixas vivem aqui: `data-band-upto` é o maior número
+                            de critérios marcados que ainda cai na faixa (a última
+                            é aberta). O JS lê daqui, não tem nada fixo nele. -->
+                    <ul class="gauge__legend">
+                        <li class="gauge__legend-item gauge__legend-item--cold" data-band-legend="cold" data-band-upto="2"><span class="gauge__dot" aria-hidden="true"></span>Precisa ser trabalhado</li>
+                        <li class="gauge__legend-item gauge__legend-item--warm is-active" data-band-legend="warm" data-band-upto="4"><span class="gauge__dot" aria-hidden="true"></span>Demonstra interesse</li>
+                        <li class="gauge__legend-item gauge__legend-item--hot" data-band-legend="hot"><span class="gauge__dot" aria-hidden="true"></span>Pronto para avançar</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
@@ -313,7 +367,90 @@ $page = getPageById(6); //Planos
             </div>
 
             <div class="recurso-split__visual">
-                <img class="recurso-split__bare" src="{{asset('storage/site/leads-atividades.png')}}" alt="Histórico de atividades de um lead no Digify com reunião, mudança de responsável, ligação, tarefa, observação e atualização no cadastro" width="1196" height="1254" loading="lazy">
+                <!-- Histórico em vetor (era um PNG). Sem casco em volta: só a
+                        régua de abas, os marcos de dia e os cartões de atividade. -->
+                <div class="timeline">
+                    <div class="timeline__tabs" aria-hidden="true">
+                        <span class="timeline__tab">Notas</span>
+                        <span class="timeline__tab is-active">Atividades</span>
+                        <span class="timeline__tab">Negócios</span>
+                    </div>
+
+                    <p class="timeline__day">Hoje</p>
+                    <ul class="timeline__list">
+                        <li class="timeline__item">
+                            <span class="timeline__icon timeline__icon--meeting" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                            <div class="timeline__card">
+                                <div class="timeline__head">
+                                    <h3 class="timeline__title">Reunião</h3>
+                                    <span class="timeline__badge">Concluída</span>
+                                </div>
+                                <p class="timeline__desc">Apresentação da proposta comercial</p>
+                                <p class="timeline__meta">Camila Marques • Hoje, 10:30</p>
+                            </div>
+                        </li>
+                        <li class="timeline__item">
+                            <span class="timeline__icon timeline__icon--owner" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                            <div class="timeline__card">
+                                <div class="timeline__head">
+                                    <h3 class="timeline__title">Mudança de responsável</h3>
+                                </div>
+                                <p class="timeline__desc">Responsável alterado de João Dias para Camila Marques</p>
+                                <p class="timeline__meta">Sistema • Hoje, 09:15</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <p class="timeline__day">Ontem</p>
+                    <ul class="timeline__list">
+                        <li class="timeline__item">
+                            <span class="timeline__icon timeline__icon--call" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+                            <div class="timeline__card">
+                                <div class="timeline__head">
+                                    <h3 class="timeline__title">Ligação</h3>
+                                    <span class="timeline__badge">Realizada</span>
+                                </div>
+                                <p class="timeline__desc">Contato para alinhamento das necessidades</p>
+                                <p class="timeline__meta">João Dias • Ontem, 16:40</p>
+                            </div>
+                        </li>
+                        <li class="timeline__item">
+                            <span class="timeline__icon timeline__icon--task" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="16 9 10.5 15 8 12.5"/></svg></span>
+                            <div class="timeline__card">
+                                <div class="timeline__head">
+                                    <h3 class="timeline__title">Tarefa</h3>
+                                    <span class="timeline__badge">Concluída</span>
+                                </div>
+                                <p class="timeline__desc">Enviar proposta comercial</p>
+                                <p class="timeline__meta">João Dias • Ontem, 14:20</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <p class="timeline__day">12 ago. 2026</p>
+                    <ul class="timeline__list">
+                        <li class="timeline__item">
+                            <span class="timeline__icon timeline__icon--note" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h9l8-8V5a1 1 0 0 0-1-1z"/><path d="M21 12h-6a2 2 0 0 0-2 2v6"/><line x1="7" y1="9" x2="15" y2="9"/><line x1="7" y1="13" x2="11" y2="13"/></svg></span>
+                            <div class="timeline__card">
+                                <div class="timeline__head">
+                                    <h3 class="timeline__title">Observação</h3>
+                                </div>
+                                <p class="timeline__desc">Cliente demonstrou interesse no plano empresarial.</p>
+                                <p class="timeline__meta">Camila Marques • 12 ago. 2026, 11:05</p>
+                            </div>
+                        </li>
+                        <li class="timeline__item">
+                            <span class="timeline__icon timeline__icon--edit" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/><line x1="15" y1="5" x2="19" y2="9"/></svg></span>
+                            <div class="timeline__card">
+                                <div class="timeline__head">
+                                    <h3 class="timeline__title">Atualização no cadastro</h3>
+                                </div>
+                                <p class="timeline__desc">Telefone e organização atualizados</p>
+                                <p class="timeline__meta">Carla Menezes • 12 ago. 2026, 09:30</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
@@ -367,7 +504,7 @@ $page = getPageById(6); //Planos
                 <a href="https://app.digify.com.br/login?signup" class="button button--white button--lg">Comece grátis</a>
                 @if (!empty($page))
                     <a href="{{ route('site.show', $page->slug) }}" class="button button--outline button--lg">Conheça os planos</a>
-                @endif                    
+                @endif  
             </div>
         </div>
     </section>

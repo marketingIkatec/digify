@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSmoothScrolling();
   setupSectionSpy();
 
+  setupGauges();
+  setupSliders();
+
   function setupSectionSpy() {
     var sections = [].slice.call(document.querySelectorAll(".privacy-section[id]"));
     var links = [].slice.call(document.querySelectorAll('.privacy-sidebar a[href^="#"]'));
@@ -210,6 +213,177 @@ document.addEventListener("DOMContentLoaded", () => {
 
     syncMode();
   }
+
+
+  /* ── Medidor ligado a um checklist ──
+     Os checkboxes são a fonte da verdade; o medidor é só leitura. Genérico:
+     as faixas (rótulo, chave de cor e corte) saem da própria legenda do HTML,
+     então cada página define as suas sem tocar aqui. O corte é por CONTAGEM
+     de marcados, não por percentual — com poucos critérios o arredondamento
+     do percentual jogaria estados inteiros para a faixa errada. */
+  function setupGauges() {
+    document.querySelectorAll("[data-gauge]").forEach(setupGauge);
+  }
+
+  function setupGauge(root) {
+    // O checklist mora na coluna vizinha, fora do medidor: o escopo é a seção.
+    var scope = root.closest("section") || document;
+    var checks = [].slice.call(scope.querySelectorAll("[data-gauge-check]"));
+    var needle = root.querySelector("[data-gauge-needle]");
+    var fill = root.querySelector("[data-gauge-fill]");
+    var scoreEl = root.querySelector("[data-gauge-score]");
+    var statusEl = root.querySelector("[data-gauge-status]");
+    var countEl = root.querySelector("[data-gauge-count]");
+    if (!checks.length || !needle || !fill || !scoreEl || !statusEl) return;
+
+    var legend = [].slice.call(root.querySelectorAll("[data-band-legend]"));
+    if (!legend.length) return;
+
+    // `upTo` é o maior número de marcados que ainda cai na faixa; a última
+    // fica aberta para não depender de o HTML fechar a conta certinho.
+    var BANDS = legend.map(function (item, i) {
+      return {
+        key: item.dataset.bandLegend,
+        label: item.dataset.bandLabel || item.textContent.trim(),
+        upTo: i === legend.length - 1 ? Infinity : Number(item.dataset.bandUpto),
+      };
+    });
+
+    var unidade = root.dataset.gaugeUnit || "critérios marcados";
+
+    function bandOf(checked) {
+      for (var i = 0; i < BANDS.length; i++) {
+        if (checked <= BANDS[i].upTo) return i;
+      }
+      return BANDS.length - 1;
+    }
+
+    function render(checked) {
+      var idx = bandOf(checked);
+      var band = BANDS[idx];
+      var value = Math.round((checked / checks.length) * 100);
+
+      // 0 → aponta para a esquerda (-180°), 100 → para a direita (0°).
+      var angle = Math.round((value * 1.8 - 180) * 100) / 100;
+      needle.setAttribute("transform", "rotate(" + angle + " 200 200)");
+      // O arco tem pathLength="100", então o resto do traço é o que falta.
+      fill.setAttribute("stroke-dashoffset", 100 - value);
+
+      scoreEl.textContent = value;
+      statusEl.textContent = band.label;
+      root.dataset.band = band.key;
+      if (countEl) {
+        countEl.textContent = checked + " de " + checks.length + " " + unidade;
+      }
+
+      legend.forEach(function (item, i) {
+        item.classList.toggle("is-active", i === idx);
+      });
+    }
+
+    function countChecked() {
+      return checks.filter(function (check) {
+        return check.checked;
+      }).length;
+    }
+
+    checks.forEach(function (check) {
+      check.addEventListener("change", function () {
+        render(countChecked());
+      });
+    });
+
+    // Entrada em cena: sai do zero e varre até o estado do markup. Um clique
+    // antes disso cancela a varredura — o que o usuário marcou vale mais.
+    var target = countChecked();
+    if (!window.IntersectionObserver) return;
+
+    var touched = false;
+    checks.forEach(function (check) {
+      check.addEventListener(
+        "change",
+        function () {
+          touched = true;
+        },
+        { once: true }
+      );
+    });
+
+    render(0);
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+          // Espera um quadro para a transição do CSS pegar a mudança.
+          requestAnimationFrame(function () {
+            if (!touched) render(target);
+          });
+        });
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(root);
+  }
+
+  /* ── Carrossel de imagens (um slide por vez) ──
+     O deslocamento é uma variável CSS no container; o JS só troca o índice.
+     Os pontos são gerados aqui para o HTML não precisar repetir um por slide. */
+  function setupSliders() {
+    document.querySelectorAll("[data-slider]").forEach(setupSlider);
+  }
+
+  function setupSlider(root) {
+    var slides = [].slice.call(root.querySelectorAll("[data-slider-slide]"));
+    var dotsBox = root.querySelector("[data-slider-dots]");
+    if (slides.length < 2) return;
+
+    var index = 0;
+    var dots = slides.map(function (slide, i) {
+      var dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "slider__dot";
+      dot.setAttribute("role", "tab");
+      dot.setAttribute("aria-label", "Slide " + (i + 1) + " de " + slides.length);
+      dot.addEventListener("click", function () {
+        goTo(i);
+      });
+      if (dotsBox) dotsBox.appendChild(dot);
+      return dot;
+    });
+
+    function goTo(next) {
+      // Dá a volta nas pontas: do último segue para o primeiro e vice-versa.
+      index = (next + slides.length) % slides.length;
+      root.style.setProperty("--slider-index", index);
+      slides.forEach(function (slide, i) {
+        // Fora de vista de verdade: sem isso o leitor de tela lê os cinco
+        // slides seguidos e o Tab entra nos que estão escondidos.
+        slide.setAttribute("aria-hidden", i === index ? "false" : "true");
+        slide.inert = i !== index;
+      });
+      dots.forEach(function (dot, i) {
+        dot.classList.toggle("is-active", i === index);
+        dot.setAttribute("aria-selected", i === index ? "true" : "false");
+      });
+    }
+
+    var prev = root.querySelector("[data-slider-prev]");
+    var next = root.querySelector("[data-slider-next]");
+    if (prev) {
+      prev.addEventListener("click", function () {
+        goTo(index - 1);
+      });
+    }
+    if (next) {
+      next.addEventListener("click", function () {
+        goTo(index + 1);
+      });
+    }
+
+    goTo(0);
+  }
+
 
   /* ── Carrossel 3D (seção "do lead ao fechamento") ── */
   function setupCarousel() {

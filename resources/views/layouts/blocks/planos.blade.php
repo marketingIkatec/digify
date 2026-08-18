@@ -1,5 +1,34 @@
 ﻿@php
 
+$budgetPlans = \App\Models\BudgetPlan::query()
+    ->with([
+        'modules' => function ($query) {
+            $query->orderBy('sort_order');
+        },
+        'features' => function ($query) {
+            $query->orderBy('sort_order');
+        },
+        'extraPrices' => function ($query) {
+            $query->orderBy('sort_order');
+        },
+    ])
+    ->orderBy('sort_order')
+    ->get();
+
+$budgetModules = \App\Models\BudgetModule::query()
+    ->with(['plans' => function ($query) {
+        $query->orderBy('sort_order');
+    }])
+    ->orderBy('sort_order')
+    ->get();
+
+$budgetFeatures = \App\Models\BudgetFeature::query()
+    ->with(['plans' => function ($query) {
+        $query->orderBy('sort_order');
+    }])
+    ->orderBy('sort_order')
+    ->get();
+
 $budgetPlans = $budgetPlans ?? collect();
 $budgetModules = $budgetModules ?? collect();
 $budgetFeatures = $budgetFeatures ?? collect();

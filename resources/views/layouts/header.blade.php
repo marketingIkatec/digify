@@ -5,7 +5,7 @@
 <header class="site-header">
     <div class="site-header__inner">
         <a class="brand" href="{{ route('home') }}" aria-label="{{ $config['site_name'] ?? '' }}">
-            <img class="brand__logo" src="{{ !empty($config['logo_header']) ? asset('storage/' . $config['logo_header']) : 'images/weuny-logo.png' }}" alt="{{ $config['site_name'] ?? '' }}" width="104">
+            <img class="brand__logo" src="{{ !empty($config['logo_header']) ? asset('storage/' . $config['logo_header']) : '' }}" alt="{{ $config['site_name'] ?? '' }}" width="104">
         </a>
 
         <input class="site-header__menu-check" type="checkbox" id="site-navigation-toggle" aria-hidden="true">

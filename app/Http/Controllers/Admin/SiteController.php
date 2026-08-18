@@ -41,41 +41,8 @@ class SiteController extends Controller
             abort(404);
         }
 
-        if($item->slug == 'planos'){
-            
-            $budgetPlans = BudgetPlan::query()
-                ->with([
-                    'modules' => function ($query) {
-                        $query->orderBy('sort_order');
-                    },
-                    'features' => function ($query) {
-                        $query->orderBy('sort_order');
-                    },
-                    'extraPrices' => function ($query) {
-                        $query->orderBy('sort_order');
-                    },
-                ])
-                ->orderBy('sort_order')
-                ->get();
-
-            $budgetModules = BudgetModule::query()
-                ->with(['plans' => function ($query) {
-                    $query->orderBy('sort_order');
-                }])
-                ->orderBy('sort_order')
-                ->get();
-
-            $budgetFeatures = BudgetFeature::query()
-                ->with(['plans' => function ($query) {
-                    $query->orderBy('sort_order');
-                }])
-                ->orderBy('sort_order')
-                ->get();
-
-            return view('pages.index')->with('item', $item)
-                    ->with('budgetPlans', $budgetPlans)
-                    ->with('budgetFeatures', $budgetFeatures)
-                    ->with('budgetModules', $budgetModules);
+        if($item->slug == 'tour-digify'){ 
+            return view('layouts.blocks.tour-digify')->with('item', $item);
         }
 
         return view('pages.site-home')->with('item', $item);
