@@ -23,7 +23,7 @@
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/build/assets/app.css?cache=<?= date('his') ?>">
-    <script src="/build/assets/js_app.js"></script>
+    <script src="/build/assets/js_app.js?cache=<?= date('his') ?>"></script>
 
 </head>
 

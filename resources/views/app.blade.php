@@ -61,7 +61,7 @@
     <link rel="stylesheet" href="/build/assets/app.css?cache=<?= date('his') ?>">
     <!--<link rel="stylesheet" href="/build/assets/app_namidia.css?cache=<?= date('his') ?>">-->
     <link rel="stylesheet" href="/build/assets/app_blog.css?cache=<?= date('his') ?>">
-    <script src="/build/assets/js_app.js"></script>
+    <script src="/build/assets/js_app.js?cache=<?= date('his') ?>"></script>
 
     @if (env('APP_ENV') != 'local')
         <!-- Google Tag Manager -->

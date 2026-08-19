@@ -143,79 +143,6 @@
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-/* ===== css/base/reset.css ===== */
-
-/* base/reset.css
-   Reset mínimo e consistente entre navegadores. */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-img,
-svg {
-  display: block;
-  max-width: 100%;
-}
-
-button {
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-ul {
-  list-style: none;
-}
-
-input {
-  font: inherit;
-}
-
-/* Acessibilidade: usuários que preferem menos movimento.
-   Zera as durações de transição via tokens (sem !important). */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --transition-fast: 0s;
-    --transition-base: 0s;
-  }
-}
-
-/* ===== css/base/global.css ===== */
-
-/* base/global.css
-   Estilos globais de documento e elementos base. */
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  color: var(--color-text);
-  background: var(--color-bg);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-section {
-  width: 100%;
-}
-
 /* Texto com gradiente de marca (aplicado a palavras de destaque) */
 .text-grad {
   background: var(--gradient-brand);
@@ -320,246 +247,6 @@ p {
   line-height: var(--line-height-base);
 }
 
-/* ===== css/layout/container.css ===== */
-
-/* layout/container.css
-   Container central de largura máxima com margem lateral fluida. */
-
-.container {
-  width: min(var(--container-width), 100% - (var(--container-gutter) * 2));
-  margin-inline: auto;
-}
-
-/* ===== css/layout/header.css ===== */
-
-/* layout/header.css
-   Cabeçalho fixo de largura total: logo à esquerda, botões à direita. */
-
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  height: var(--nav-h);
-  display: flex;
-  align-items: center;
-  background: var(--color-white);
-  border-bottom: 1px solid var(--color-border);
-  transition: box-shadow 0.3s var(--ease);
-}
-
-.site-header.is-scrolled {
-  box-shadow: 0 4px 20px rgba(13, 27, 53, 0.07);
-}
-
-.site-header__inner {
-  width: min(var(--container-width), 100% - (var(--container-gutter) * 2));
-  margin-inline: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.brand__logo {
-  width: 104px;
-  height: auto;
-}
-
-.site-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  margin-inline: auto;
-}
-
-.site-nav__link {
-  padding: 10px 12px;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  line-height: 1;
-  border-radius: var(--radius-pill);
-  transition:
-    color var(--transition-fast),
-    background var(--transition-fast);
-}
-
-.site-nav__link:hover,
-.site-nav__link:focus-visible {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-
-.site-header__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-@media (max-width: 1060px) {
-  .site-nav {
-    display: none;
-  }
-}
-
-@media (max-width: 520px) {
-  .brand__logo {
-    width: 88px;
-  }
-
-  .site-header__actions {
-    gap: var(--space-2);
-  }
-
-  .site-header__actions .button {
-    padding: 10px 16px;
-    font-size: var(--font-size-xs);
-  }
-}
-
-/* ===== css/layout/footer.css ===== */
-
-/* layout/footer.css
-   Rodapé claro com logo, tagline, links e copyright. */
-
-.site-footer {
-  padding: var(--space-12) 0 var(--space-9);
-  background: var(--color-white);
-  border-top: 1px solid var(--color-border);
-}
-
-.site-footer__inner {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-  margin-bottom: var(--space-8);
-}
-
-.site-footer__brand {
-  max-width: 340px;
-}
-
-.site-footer__logo {
-  width: 92px;
-  height: auto;
-  margin-bottom: var(--space-4);
-}
-
-.site-footer__tagline {
-  font-size: var(--font-size-md);
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-}
-
-.site-footer__social {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
-}
-
-.site-footer__social-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  background: var(--color-bg-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    transform var(--transition-fast) var(--spring);
-  height: 40px;
-  width: 40px;
-  justify-content: center;
-}
-
-.site-footer__social-link svg {
-  width: 16px;
-  height: 16px;
-}
-
-.site-footer__social-link:hover,
-.site-footer__social-link:focus-visible {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
-}
-
-.site-footer__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-5);
-}
-
-.site-footer__link {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  transition: color var(--transition-fast);
-}
-
-.site-footer__link:hover,
-.site-footer__link:focus-visible {
-  color: var(--color-primary);
-}
-
-.site-footer__bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
-}
-
-.site-footer__copy {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.site-footer__social-cta {
-  margin-left: auto;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-ink);
-}
-
-.site-footer__social {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-@media (max-width: 620px) {
-  .site-footer__inner {
-    flex-direction: column;
-    gap: var(--space-6);
-  }
-
-  .site-footer__social-cta {
-    margin-left: 0;
-  }
-}
-
-/* ===== css/components/button.css ===== */
 
 /* components/button.css
    Botão reutilizável e seus modificadores. */
@@ -4857,6 +4544,42 @@ p {
   }
 }
 
+@media (max-width: 900px) {
+  .recurso-block .feature-list {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    max-width: 560px;
+  }
+
+  .recurso-block .feature-item {
+    align-items: center;
+  }
+
+  .recurso-block .feature-item__title,
+  .recurso-block .feature-item__text {
+    max-width: none;
+  }
+
+  .recurso-block .segments__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recurso-block .recurso-split,
+  .recurso-block .recurso-panel {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+
+  .recurso-block .recurso-panel__visual img {
+    width: 100%;
+  }
+
+  .recurso-block .recurso-actions,
+  .recurso-block .cta-strip {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 520px) {
   .recurso-hero {
     padding-top: calc(var(--nav-h) + var(--space-14));
@@ -4870,15 +4593,22 @@ p {
   /* .button é nowrap/line-height:1, e com nowrap a largura mínima do texto
      ignora o width:100% — rótulos longos como "Comece agora gratuitamente"
      estouravam o container no mobile. Liberar a quebra resolve. */
-  .recurso-hero__actions .button,
-  .recurso-actions .button,
-  .recurso-block .cta-strip .button {
-    width: 100%;
-    white-space: normal;
-    line-height: 1.3;
-  }
 
   .recurso-panel {
+    padding: var(--space-5);
+  }
+
+  .recurso-block .recurso-actions,
+  .recurso-block .cta-strip {
+    flex-direction: column;
+  }
+
+  .recurso-block .feature-list {
+    gap: var(--space-4);
+  }
+
+  .recurso-block .segment-card,
+  .recurso-block .planos-highlight {
     padding: var(--space-5);
   }
 

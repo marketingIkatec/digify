@@ -12,8 +12,6 @@
                 <p class="site-footer__tagline">CRM que organiza sua operação comercial. Simples de começar, modular para crescer.</p>
             </div>
             <ul class="site-footer__links">
-                <li><a class="site-footer__link" href="{{route('home')}}#recursos">Recursos</a></li>
-                <li><a class="site-footer__link" href="{{route('home')}}#modules">Funcionalidades</a></li>
                 @if (!empty($menuPagina))
                     @foreach ($menuPagina as $page)
                         <a class="site-footer__link" href='{{ route('site.show', $page->slug) }}'>{{ $page->titulo }}</a>

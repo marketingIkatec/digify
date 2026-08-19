@@ -1,7 +1,7 @@
 ﻿@php
     $page = getPageById(6); //Planos
 @endphp
-<link rel="stylesheet" href="/build/assets/main.css">
+<link rel="stylesheet" href="/build/assets/main.css?cache=<?=date('His');?>">
 <main id="main">
     <section class="recurso-hero" aria-labelledby="crm-title">
         <div class="recurso-hero__bg" aria-hidden="true">

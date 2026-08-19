@@ -1,4 +1,4 @@
-﻿<link rel="stylesheet" href="/build/assets/main.css">
+﻿<link rel="stylesheet" href="/build/assets/main.css?cache=<?=date('His');?>">
 <main id="main">
         <section class="recurso-hero" aria-labelledby="funil-title">
             <div class="recurso-hero__bg" aria-hidden="true">
