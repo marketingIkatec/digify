@@ -9,9 +9,11 @@
     <section class="blog-hero">
         <div class="blog-hero-content">
             <span class="blog-eyebrow">Digify Blog</span>
+            {{--
             <h1 class="blog-hero-title">Ideias, análise e visão prática para negócios digitais.</h1>
+            
             <p class="blog-hero-text">Leituras objetivas sobre tecnologia, vendas e automação para apoiar decisões mais claras no dia a dia.</p>
-
+--}}
             <form action="{{ route('blog.site.index') }}" method="GET" class="blog-search-form">
                 <input type="text" name="search" value="{{ $search }}" placeholder="Buscar artigo, categoria ou autor" class="blog-search-input">
                 <button type="submit" class="blog-search-button" aria-label="Buscar">
@@ -21,10 +23,10 @@
                 </button>
             </form>
 
-            <div class="blog-hero-meta">
+            {{--<div class="blog-hero-meta">
                 <span>{{ $blogs->total() }} artigos publicados</span>
                 <span>Atualizado com foco em resultado</span>
-            </div>
+            </div>--}}
         </div>
     </section>
 
