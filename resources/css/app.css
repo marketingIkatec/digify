@@ -118,7 +118,7 @@
   /* ===== Layout ===== */
   --container-width: 1160px;
   --container-gutter: 24px;
-  --nav-h: 72px;
+  --nav-h: 22px;
 
   /* ===== Bordas ===== */
   --radius-sm: 8px;
@@ -3682,7 +3682,7 @@ p {
 
 .site-footer .back-to-top {
     position: fixed;
-    bottom: 60px;
+    bottom: 28px;
     left: 30px;
     background-color: #28dbff;
     color: white;

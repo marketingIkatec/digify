@@ -303,9 +303,6 @@
             <p>Organize produtos, preços e condições comerciais e mantenha todo o processo conectado à negociação.</p>
             <div class="planos-cta__actions">
                 <a href="https://app.digify.com.br/login?signup" class="button button--white button--lg">Comece grátis</a>
-                @if (!empty($page))
-                    <a href="{{ route('site.show', $page->slug) }}" class="button button--outline button--lg">Conheça os planos</a>
-                @endif  
             </div>
         </div>
     </section>

@@ -413,9 +413,6 @@
             <p>Acompanhe os números, encontre gargalos e entenda onde estão as melhores oportunidades para melhorar o desempenho comercial.</p>
             <div class="planos-cta__actions">
                 <a href="https://app.digify.com.br/login?signup" class="button button--white button--lg">Comece grátis</a>
-                @if (!empty($page))
-                    <a href="{{ route('site.show', $page->slug) }}" class="button button--outline button--lg">Conheça os planos</a>
-                @endif 
             </div>
         </div>
     </section>

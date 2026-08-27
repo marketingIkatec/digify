@@ -402,9 +402,6 @@
             <p>Reduza tarefas repetitivas, padronize ações do processo comercial e deixe sua equipe concentrada no que realmente exige atenção.</p>
             <div class="planos-cta__actions">
                 <a href="https://app.digify.com.br/login?signup" class="button button--white button--lg">Começar agora gratuitamente</a>
-                @if (!empty($page))
-                    <a href="{{ route('site.show', $page->slug) }}" class="button button--outline button--lg">Conheça os planos</a>
-                @endif 
             </div>
         </div>
     </section>

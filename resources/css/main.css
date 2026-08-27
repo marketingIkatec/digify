@@ -921,13 +921,6 @@ p {
   padding: var(--space-section) 0;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 72px;
-  align-items: center;
-}
-
 .form-copy .kicker {
   display: block;
   margin-bottom: 16px;
@@ -1471,10 +1464,6 @@ p {
   align-items: center;
 }
 
-.hero__copy {
-  width: 550px;
-}
-
 .hero__badge {
   display: inline-flex;
   align-items: center;
@@ -1598,10 +1587,6 @@ p {
   .hero__inner {
     grid-template-columns: 1fr;
     gap: var(--space-13);
-  }
-
-  .hero__copy {
-    max-width: 100%;
   }
 }
 
@@ -3714,7 +3699,7 @@ p {
 .recurso-hero {
   position: relative;
   overflow: hidden;
-  padding: calc(var(--nav-h) + var(--space-20)) 0 var(--space-20);
+  padding: calc(12px + var(--space-20)) 0 var(--space-20);
   background: linear-gradient(
     180deg,
     var(--color-bg) 0%,
@@ -5298,7 +5283,7 @@ p {
   }
 
   .recurso-hero {
-    padding-top: calc(var(--nav-h) + var(--space-14));
+    padding-top: calc(12px + var(--space-14));
   }
 
   .recurso-hero__actions,

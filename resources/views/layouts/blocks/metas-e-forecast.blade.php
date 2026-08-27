@@ -287,9 +287,6 @@
             <p>Acompanhe o que já foi vendido, o que ainda pode fechar e quanto falta para alcançar seus objetivos comerciais.</p>
             <div class="planos-cta__actions">
                 <a href="https://app.digify.com.br/login?signup" class="button button--white button--lg">Comece grátis</a>
-                @if (!empty($page))
-                    <a href="{{ route('site.show', $page->slug) }}" class="button button--outline button--lg">Conheça os planos</a>
-                @endif 
             </div>
         </div>
     </section>

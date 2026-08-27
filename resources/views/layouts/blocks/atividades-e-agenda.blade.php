@@ -413,9 +413,6 @@
             <p>Organize a rotina, mantenha os próximos passos visíveis e dê continuidade às oportunidades no momento certo.</p>
             <div class="planos-cta__actions">
                 <a href="https://app.digify.com.br/login?signup" class="button button--white button--lg">Começar agora gratuitamente</a>
-                @if (!empty($page))
-                    <a href="{{ route('site.show', $page->slug) }}" class="button button--outline button--lg">Conheça os planos</a>
-                @endif 
             </div>
         </div>
     </section>
