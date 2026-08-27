@@ -1,12 +1,3 @@
-/* main.css - estilos consolidados da unica pagina index.php. */
-
-/* ===== css/settings/tokens.css ===== */
-
-/* settings/tokens.css
-   Fonte de verdade dos valores visuais do Digify.
-   Baseado no design "Digify V3 — Light Edition" (exemplos/lp-digify-v3.css).
-   Nunca usar valores mágicos fora daqui. */
-
 :root {
   --bg: #eef3fd;
   --bg-2: #f5f8ff;

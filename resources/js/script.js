@@ -1,0 +1,656 @@
+document.addEventListener("DOMContentLoaded", () => {
+  setupTabs(".js-feature-tab", ".features__panel");
+  setupHeaderShrink();
+  setupCarousel();
+  setupSmoothScrolling();
+  setupSectionSpy();
+  setupGauges();
+  setupSliders();
+
+  function setupSectionSpy() {
+    var sections = [].slice.call(document.querySelectorAll(".privacy-section[id]"));
+    var links = [].slice.call(document.querySelectorAll('.privacy-sidebar a[href^="#"]'));
+    if (!sections.length || !links.length || !window.IntersectionObserver) return;
+
+    var linksById = links.reduce(function (acc, link) {
+      var id = link.getAttribute("href").slice(1);
+      acc[id] = link;
+      return acc;
+    }, {});
+
+    function setActive(id) {
+      links.forEach(function (link) {
+        link.classList.toggle("is-active", link === linksById[id]);
+      });
+    }
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-28% 0px -62% 0px",
+        threshold: 0,
+      },
+    );
+
+    sections.forEach(function (section) {
+      observer.observe(section);
+    });
+  }
+
+  function setupSmoothScrolling() {
+    document.querySelectorAll('a[href*="#"]').forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        var href = link.getAttribute("href");
+        if (!href || href === "#") return;
+
+        var url;
+        try {
+          url = new URL(href, window.location.href);
+        } catch (error) {
+          return;
+        }
+
+        if (!url.hash || url.origin !== window.location.origin) return;
+
+        var currentPath = normalizePath(window.location.pathname);
+        var targetPath = normalizePath(url.pathname);
+        if (currentPath !== targetPath) return;
+
+        var target = document.querySelector(url.hash);
+        if (!target) return;
+
+        event.preventDefault();
+
+        var header = document.querySelector(".site-header");
+        var offset = header ? header.offsetHeight + 18 : 0;
+        var top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.history.pushState(null, "", url.hash);
+        window.scrollTo({ top: top, behavior: "smooth" });
+      });
+    });
+
+    function normalizePath(path) {
+      return path.replace(/\/index\.php$/, "").replace(/\/$/, "") || "/";
+    }
+  }
+
+  /* ── Abas (seção Recursos) ── */
+  function setupTabs(triggerSelector, panelSelector) {
+    var triggers = document.querySelectorAll(triggerSelector);
+    if (!triggers.length) return;
+
+    triggers.forEach(function (trigger) {
+      trigger.addEventListener("click", function () {
+        var panel = document.getElementById(
+          trigger.getAttribute("data-target"),
+        );
+        if (!panel) return;
+
+        document.querySelectorAll(triggerSelector).forEach(function (el) {
+          el.classList.remove("is-active");
+          el.setAttribute("aria-selected", "false");
+        });
+        document.querySelectorAll(panelSelector).forEach(function (el) {
+          el.classList.remove("is-active");
+        });
+
+        trigger.classList.add("is-active");
+        trigger.setAttribute("aria-selected", "true");
+        panel.classList.add("is-active");
+        updateFeatureHead(panel);
+      });
+    });
+
+    function updateFeatureHead(panel) {
+      var title = panel.querySelector(".features__panel-title");
+      var desc = panel.querySelector(".features__desc");
+      var activeTitle = document.querySelector(".js-feature-title");
+      var activeDesc = document.querySelector(".js-feature-desc");
+
+      if (title && activeTitle) activeTitle.textContent = title.textContent;
+      if (desc && activeDesc) activeDesc.textContent = desc.textContent;
+    }
+  }
+
+  /* ── Encolher o header ao rolar ── */
+  function setupHeaderShrink() {
+    var header = document.querySelector(".site-header");
+    if (!header) return;
+    var onScroll = function () {
+      header.classList.toggle("is-scrolled", window.scrollY > 40);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* ── Medidor ligado a um checklist ──
+     Os checkboxes são a fonte da verdade; o medidor é só leitura. Genérico:
+     as faixas (rótulo, chave de cor e corte) saem da própria legenda do HTML,
+     então cada página define as suas sem tocar aqui. O corte é por CONTAGEM
+     de marcados, não por percentual — com poucos critérios o arredondamento
+     do percentual jogaria estados inteiros para a faixa errada. */
+  function setupGauges() {
+    document.querySelectorAll("[data-gauge]").forEach(setupGauge);
+  }
+
+  function setupGauge(root) {
+    // O checklist mora na coluna vizinha, fora do medidor: o escopo é a seção.
+    var scope = root.closest("section") || document;
+    var checks = [].slice.call(scope.querySelectorAll("[data-gauge-check]"));
+    var needle = root.querySelector("[data-gauge-needle]");
+    var fill = root.querySelector("[data-gauge-fill]");
+    var scoreEl = root.querySelector("[data-gauge-score]");
+    var statusEl = root.querySelector("[data-gauge-status]");
+    var countEl = root.querySelector("[data-gauge-count]");
+    if (!checks.length || !needle || !fill || !scoreEl || !statusEl) return;
+
+    var legend = [].slice.call(root.querySelectorAll("[data-band-legend]"));
+    if (!legend.length) return;
+
+    // `upTo` é o maior número de marcados que ainda cai na faixa; a última
+    // fica aberta para não depender de o HTML fechar a conta certinho.
+    var BANDS = legend.map(function (item, i) {
+      return {
+        key: item.dataset.bandLegend,
+        label: item.dataset.bandLabel || item.textContent.trim(),
+        upTo: i === legend.length - 1 ? Infinity : Number(item.dataset.bandUpto),
+      };
+    });
+
+    var unidade = root.dataset.gaugeUnit || "critérios marcados";
+
+    function bandOf(checked) {
+      for (var i = 0; i < BANDS.length; i++) {
+        if (checked <= BANDS[i].upTo) return i;
+      }
+      return BANDS.length - 1;
+    }
+
+    function render(checked) {
+      var idx = bandOf(checked);
+      var band = BANDS[idx];
+      var value = Math.round((checked / checks.length) * 100);
+
+      // 0 → aponta para a esquerda (-180°), 100 → para a direita (0°).
+      var angle = Math.round((value * 1.8 - 180) * 100) / 100;
+      needle.setAttribute("transform", "rotate(" + angle + " 200 200)");
+      // O arco tem pathLength="100", então o resto do traço é o que falta.
+      fill.setAttribute("stroke-dashoffset", 100 - value);
+
+      scoreEl.textContent = value;
+      statusEl.textContent = band.label;
+      root.dataset.band = band.key;
+      if (countEl) {
+        countEl.textContent = checked + " de " + checks.length + " " + unidade;
+      }
+
+      legend.forEach(function (item, i) {
+        item.classList.toggle("is-active", i === idx);
+      });
+    }
+
+    function countChecked() {
+      return checks.filter(function (check) {
+        return check.checked;
+      }).length;
+    }
+
+    checks.forEach(function (check) {
+      check.addEventListener("change", function () {
+        render(countChecked());
+      });
+    });
+
+    // Entrada em cena: sai do zero e varre até o estado do markup. Um clique
+    // antes disso cancela a varredura — o que o usuário marcou vale mais.
+    var target = countChecked();
+    if (!window.IntersectionObserver) return;
+
+    var touched = false;
+    checks.forEach(function (check) {
+      check.addEventListener(
+        "change",
+        function () {
+          touched = true;
+        },
+        { once: true }
+      );
+    });
+
+    render(0);
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+          // Espera um quadro para a transição do CSS pegar a mudança.
+          requestAnimationFrame(function () {
+            if (!touched) render(target);
+          });
+        });
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(root);
+  }
+
+  /* ── Carrossel de imagens (um slide por vez) ──
+     O deslocamento é uma variável CSS no container; o JS só troca o índice.
+     Os pontos são gerados aqui para o HTML não precisar repetir um por slide. */
+  function setupSliders() {
+    document.querySelectorAll("[data-slider]").forEach(setupSlider);
+  }
+
+  function setupSlider(root) {
+    var slides = [].slice.call(root.querySelectorAll("[data-slider-slide]"));
+    var dotsBox = root.querySelector("[data-slider-dots]");
+    if (slides.length < 2) return;
+
+    var index = 0;
+    var dots = slides.map(function (slide, i) {
+      var dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "slider__dot";
+      dot.setAttribute("role", "tab");
+      dot.setAttribute("aria-label", "Slide " + (i + 1) + " de " + slides.length);
+      dot.addEventListener("click", function () {
+        goTo(i);
+      });
+      if (dotsBox) dotsBox.appendChild(dot);
+      return dot;
+    });
+
+    function goTo(next) {
+      // Dá a volta nas pontas: do último segue para o primeiro e vice-versa.
+      index = (next + slides.length) % slides.length;
+      root.style.setProperty("--slider-index", index);
+      slides.forEach(function (slide, i) {
+        // Fora de vista de verdade: sem isso o leitor de tela lê os cinco
+        // slides seguidos e o Tab entra nos que estão escondidos.
+        slide.setAttribute("aria-hidden", i === index ? "false" : "true");
+        slide.inert = i !== index;
+      });
+      dots.forEach(function (dot, i) {
+        dot.classList.toggle("is-active", i === index);
+        dot.setAttribute("aria-selected", i === index ? "true" : "false");
+      });
+    }
+
+    var prev = root.querySelector("[data-slider-prev]");
+    var next = root.querySelector("[data-slider-next]");
+    if (prev) {
+      prev.addEventListener("click", function () {
+        goTo(index - 1);
+      });
+    }
+    if (next) {
+      next.addEventListener("click", function () {
+        goTo(index + 1);
+      });
+    }
+
+    goTo(0);
+  }
+
+  /* ── Carrossel 3D (seção "do lead ao fechamento") ── */
+  function setupCarousel() {
+    var stage = document.querySelector(".carousel-3d");
+    if (!stage) return;
+    var cards = [].slice.call(document.querySelectorAll(".js-carousel-card"));
+    var dots = [].slice.call(document.querySelectorAll(".js-carousel-dot"));
+    var total = cards.length;
+    if (!total) return;
+
+    var POS = [
+      "is-center",
+      "is-right-1",
+      "is-right-2",
+      "is-left-1",
+      "is-left-2",
+      "is-hidden",
+    ];
+    var current = 0;
+    var timer = null;
+    var reduce =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function posClass(i, active) {
+      var diff = (i - active + total) % total;
+      if (diff === 0) return "is-center";
+      if (diff === 1) return "is-right-1";
+      if (diff === 2) return "is-right-2";
+      if (diff === total - 1) return "is-left-1";
+      if (diff === total - 2) return "is-left-2";
+      return "is-hidden";
+    }
+
+    function goTo(idx) {
+      current = ((idx % total) + total) % total;
+      cards.forEach(function (card, i) {
+        POS.forEach(function (c) {
+          card.classList.remove(c);
+        });
+        var p = posClass(i, current);
+        card.classList.add(p);
+        card.setAttribute("aria-hidden", p === "is-center" ? "false" : "true");
+      });
+      dots.forEach(function (d, i) {
+        d.classList.toggle("is-active", i === current);
+        d.setAttribute("aria-selected", i === current ? "true" : "false");
+      });
+    }
+
+    function restartAuto() {
+      if (reduce) return;
+      clearInterval(timer);
+      timer = setInterval(function () {
+        goTo(current + 1);
+      }, 5500);
+    }
+
+    var prev = document.querySelector(".js-carousel-prev");
+    var next = document.querySelector(".js-carousel-next");
+    if (prev)
+      prev.addEventListener("click", function () {
+        goTo(current - 1);
+        restartAuto();
+      });
+    if (next)
+      next.addEventListener("click", function () {
+        goTo(current + 1);
+        restartAuto();
+      });
+
+    dots.forEach(function (d) {
+      d.addEventListener("click", function () {
+        goTo(parseInt(d.getAttribute("data-dot"), 10));
+        restartAuto();
+      });
+    });
+
+    cards.forEach(function (card, i) {
+      card.addEventListener("click", function () {
+        if (i !== current) {
+          goTo(i);
+          restartAuto();
+        }
+      });
+    });
+
+    stage.addEventListener("mouseenter", function () {
+      clearInterval(timer);
+    });
+    stage.addEventListener("mouseleave", restartAuto);
+
+    goTo(0);
+    restartAuto();
+  }
+
+  // ======= LÓGICA DO BLOCO WEBSITE ========
+
+  function isValidURL(url) {
+    const pattern = new RegExp(
+      "^(https?:\\/\\/)?" +
+        "([a-zA-Z0-9_-]+\\.)+[a-zA-Z]{2,}" +
+        "(\\/[a-zA-Z0-9_./-]*)*$",
+      "i",
+    );
+    return pattern.test(url);
+  }
+
+  /**
+   * Detecta o país do usuário através do navegador
+   * e define automaticamente o DDI correspondente.
+   *
+   * Exemplos:
+   * - pt-BR -> br (+55)
+   * - pt-PT -> pt (+351)
+   * - en-US -> us (+1)
+   */
+  function definirDDIPorPais() {
+    const locale = navigator.language || navigator.userLanguage || "en-US";
+
+    let codigoPais = "br"; // fallback padrão
+
+    // Obtém a rota atual
+    const rota = window.location.pathname.toLowerCase();
+
+    // Define o país com base na rota
+    if (rota.startsWith("/es")) {
+      codigoPais = "co"; // Espanhol -> Colômbia (+57)
+    } else if (rota.startsWith("/en")) {
+      codigoPais = "us"; // Estados Unidos (+1)
+    }
+
+    // Extrai o código do país da locale (ex: "pt-BR" => "BR")
+    if (locale.includes("-")) {
+      //codigoPais = locale.split("-")[1].toLowerCase();
+    }
+
+    // Mapeamento dos países mais utilizados
+    const paisesSuportados = ["br", "pt", "us", "ar", "es", "co", "mx", "ve"];
+
+    // Se não estiver na lista, verifica a rota
+    if (!paisesSuportados.includes(codigoPais)) {
+      // Define o país com base na rota
+      if (rota.startsWith("/es")) {
+        codigoPais = "co"; // Espanhol -> Colômbia (+57)
+      } else if (rota.startsWith("/en")) {
+        codigoPais = "us"; // Estados Unidos (+1)
+      }
+    }
+
+    // Define o país no intl-tel-input
+    return codigoPais;
+  }
+
+  window.definirDDIPorPais = definirDDIPorPais;
+
+  const campos = document.querySelectorAll(".whatsaap");
+  if (campos) {
+    // Mapa de países do select -> código ISO do intl-tel-input
+    const mapaPaisesParaISO = {
+      Argentina: "ar",
+      Bolívia: "bo",
+      Chile: "cl",
+      Colômbia: "co",
+      "Costa Rica": "cr",
+      Equador: "ec",
+      Espanha: "es",
+      "Emirados Árabes Unidos": "ae",
+      "Estados Unidos da América": "us",
+      Venezuela: "ve",
+      Índia: "in",
+    };
+
+    campos.forEach((input) => {
+      input.addEventListener("countrychange", function () {
+        input.value = "";
+      });
+
+      const iti = window.intlTelInput(input, {
+        initialCountry: definirDDIPorPais(),
+        separateDialCode: true,
+        preferredCountries: ["br", "pt", "us", "ar", "es", "co", "mx", "ve"],
+        utilsScript:
+          "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      });
+
+      /**
+       * Procura o select de país dentro do mesmo container do input.
+       * Adicione a classe "pais-mkt-espanhol" ao seu <select>.
+       */
+      const selectPaises = document.querySelectorAll(".pais-mkt-espanhol");
+      selectPaises.forEach((selectPais) => {
+        selectPais.addEventListener("change", function () {
+          const paisSelecionado = this.value;
+          const codigoISO = mapaPaisesParaISO[paisSelecionado];
+
+          if (codigoISO) {
+            // Atualiza o DDI
+            iti.setCountry(codigoISO);
+
+            // Limpa o telefone
+            input.value = "";
+
+            // Dispara o evento para manter o comportamento existente
+            input.dispatchEvent(new Event("countrychange"));
+          }
+        });
+      });
+
+      input.addEventListener("input", function (e) {
+        let v = e.target.value;
+
+        const country = iti.getSelectedCountryData().iso2;
+
+        // remove +55 antes de processar
+        v = v.replace("+55", "").replace(/\D/g, "");
+
+        if (country === "br") {
+          if (v.length > 11) v = v.slice(0, 11);
+
+          if (v.length > 10) {
+            v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+          } else if (v.length > 6) {
+            v = v.replace(/^(\d{2})(\d{4,5})(\d{0,4})$/, "($1) $2-$3");
+          } else if (v.length > 2) {
+            v = v.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+          } else {
+            v = v.replace(/^(\d*)$/, "($1");
+          }
+
+          v = "+55 " + v;
+        }
+
+        e.target.value = v;
+      });
+
+      // Ao sair do campo (blur)
+      input.addEventListener("blur", function () {
+        const country = iti.getSelectedCountryData().iso2;
+
+        const numeroCompleto = iti.getNumber();
+
+        if (!iti.isValidNumber()) {
+          input.classList.add("is-invalid");
+        } else {
+          input.classList.remove("is-invalid");
+          if (country != "br") {
+            input.value = numeroCompleto; // formato internacional
+          }
+        }
+      });
+    });
+  }
+  /* ====== Whatsapp ====== */
+
+  const contactForm = document.getElementById("contact-form");
+
+  if (contactForm) {
+    contactForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const form = this;
+      const formData = new FormData(form);
+
+      const btn = form.querySelector('button[type="submit"]');
+      const errorMensagem = document.getElementById(`error-message`);
+      const formSuccess = document.getElementById(`form-success`);
+      const nome = form.getAttribute("name");
+
+      bloquearBotao(btn);
+
+      const url = form.dataset.action;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        limparErros(form);
+        if (response.ok || data.success) {
+          form.style.display = "none";
+          formSuccess.style.display = "flex";
+        } else if (response.status === 422) {
+          exibirErrosValidacao(form, data.errors);
+        } else {
+          errorMensagem.innerHTML = `<div class="error-message">Erro ao enviar. Tente novamente.</div>`;
+        }
+      } catch (err) {
+        errorMensagem.innerHTML = `<div class="error-message">Falha na conexão.</div>`;
+      } finally {
+        liberarBotao(btn);
+      }
+    });
+  }
+
+  function bloquearBotao(botao, texto = "Envío...") {
+    botao.dataset.originalText = botao.textContent;
+    botao.disabled = true;
+    botao.textContent = texto;
+    botao.classList.add("loading");
+  }
+
+  function liberarBotao(botao) {
+    botao.classList.remove("loading");
+    botao.disabled = false;
+    botao.textContent = botao.dataset.originalText;
+  }
+
+  function limparErros(form) {
+    form.querySelectorAll(".error-message, .is-invalid").forEach((el) => {
+      el.classList?.remove("is-invalid");
+      if (el.classList?.contains("error-message")) el.remove();
+    });
+  }
+
+  function exibirErrosValidacao(form, errors) {
+    Object.entries(errors).forEach(([campo, mensagens]) => {
+      const input = form.querySelector(`[name="${campo}"]`);
+      if (!input) return;
+
+      input.classList.add("is-invalid");
+
+      const div = document.createElement("div");
+      div.classList.add("error-message");
+      div.innerHTML = mensagens.join("<br>");
+      input.insertAdjacentElement("afterend", div);
+
+      input.addEventListener("input", () => limparErros(form), { once: true });
+    });
+  }
+
+  function handleSuccess(nome, form, data) {
+    // Caso seja formulário WhatsApp
+    if (nome === "whatsapp") {
+      window.open(data.whatsapp_url, "_blank");
+      form.reset();
+      document.getElementById("whatsappModal")?.classList.remove("active");
+      return;
+    }
+  }
+
+  document.querySelectorAll(".btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      document
+        .getElementById("formulario-de-contato")
+        .scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  // ======= LÓGICA DO BLOCO WEBSITE ========
+});
