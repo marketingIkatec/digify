@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Setting;
 use App\Models\LeadContato;
 use App\Models\LeadWhatsApp;
+use App\Models\AccountDigifyHubspot;
 use App\Models\LeadCustomContato;
 use App\Models\FormHubSpot;
 use Illuminate\Http\Request;
@@ -81,7 +82,101 @@ class HubspotCampaignService
                 $payload
             );
 
-        return $response->json();
+        return $response['results'][0]['id'] ?? null;
+    }
+
+    public function findDealByAccount(AccountDigifyHubspot $account){
+
+        if(!empty($account)){
+            $token = $this->token;
+
+            $payload = [
+                'inputs' => [
+                    ['id' => $account->hubspot_account_id]
+                ]
+            ];
+
+            $url = "https://api.hubapi.com/crm/v3/associations/Contacts/Deals/batch/read";
+
+             $response = Http::withToken($token)
+                ->post(
+                    $url,
+                    $payload
+                );
+            $results = $response->json();
+
+            if(empty($results['results'])){ // não tem deal associado
+                $pipeline = "913377080"; // digify
+
+                /*Novo Cadastro → 1388412971
+                  Diagnóstico + Apresentação → 1388412973
+                  Oportunidade Qualificada → 1388412974
+                  Trial Ativo → 1389463345
+                  Reativação → 1389463346
+                  Encerrado → 1389463348
+                */
+
+                $url = "https://api.hubapi.com/crm/v3/objects/deals";
+
+                $response = Http::withToken($token)
+                ->post('https://api.hubapi.com/crm/v3/objects/deals', [
+                    'properties' => [
+                        'dealname' => 'Digify - '.$account->email,
+                        'pipeline' => '913377080',
+                        'dealstage' => '1388412971',
+                    ],
+
+                    'associations' => [
+                        [
+                            'to' => [
+                                'id' => $account->hubspot_account_id,
+                            ],
+                            'types' => [
+                                [
+                                    'associationCategory' => 'HUBSPOT_DEFINED',
+                                    'associationTypeId' => 3,
+                                ],
+                            ],
+                        ],
+                    ],
+                ]);
+                $results = $response->json();
+                return $results['id']; 
+            }
+
+            return $response['results'][0]['to'][0]['id'];
+        }
+        return null;
+
+    }
+
+    public function updateDealByContact(AccountDigifyHubspot $account, $properties = []){
+        
+        if($account->hubspot_deal_id){
+            
+            $account->updateProperties($properties); // salva as informações no banco de dados.
+
+            $response = Http::withToken($this->token)->patch(
+                "https://api.hubapi.com/crm/v3/objects/deals/{$account->hubspot_deal_id}",
+                [
+                    'properties' => $properties,
+                ]
+            );
+
+            if ($response->failed()) {
+                //Tratamento de erros
+                $json = $response->json();
+
+                $error = trim(($json['message'] ?? '') . ' ' . ($json['erro'] ?? ''));
+                Log::info('Erro ao atualizar o contato na HubSpot', ['digify_account_id' => $account->digify_account_id, 'error-message' => $error, 'properties' => $properties]);
+                throw new Exception($error);
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Negocio atualizado com sucesso.',
+            ];
+        }       
     }
 
     /*

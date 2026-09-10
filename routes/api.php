@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AccountDigifyHubspotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +17,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     //return $request->user();
+});
+
+Route::prefix('app-digify')->middleware('digify.token')->group(function () {
+    Route::post('/create-account', [
+        AccountDigifyHubspotController::class,
+        'createAccountDigifyStore'
+    ]);
+
+    Route::post('/account-logged-in', [
+        AccountDigifyHubspotController::class,
+        'accountLoggedInStore'
+    ]);
+
+    Route::post('/account-actions', [
+        AccountDigifyHubspotController::class,
+        'accountActionsStore'
+    ]);
 });

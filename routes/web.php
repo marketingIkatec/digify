@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SiteController;
 use App\Services\VisitasService; 
 use App\Http\Controllers\LeadAppController; 
 use App\Models\LeadContato;
+use App\Models\AccountDigifyHubspot;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,3 +58,14 @@ Route::get('/whatsapp/enviar', function (\Illuminate\Http\Request $request) {
         'https://wa.me/' . $telefone . '?text=' . urlencode($mensagem)
     );
 })->name('whatsapp.enviar');
+
+
+Route::get('/app-digify', function () {
+    $hubspotService = new \App\Services\HubspotCampaignService();
+    
+    $account = AccountDigifyHubspot::find(6);
+    $properties['digify_first_login'] = date('d/m/Y H:i:s');
+    $properties['digify_login']       = date('d/m/Y H:i:s');
+    return $hubspotService->updateDealByContact($account, $properties);
+    
+});
