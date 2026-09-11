@@ -141,7 +141,7 @@ class HubspotCampaignService
                     ],
                 ]);
                 $results = $response->json();
-                return $results['id']; 
+                return !empty($results['id']) ? $results['id'] : ''; 
             }
 
             return $response['results'][0]['to'][0]['id'];

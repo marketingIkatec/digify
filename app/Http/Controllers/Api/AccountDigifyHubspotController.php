@@ -88,7 +88,7 @@ class AccountDigifyHubspotController extends Controller
             $response  = $digifyService->verifyDigifyAccount($data);
             if($response['success']){        
                 $response  = $digifyService->accountActions($response['account'], $data);
-                
+
                 if($response['success']){
                     return $this->returnSuccessJson($data, $response['account']);
                 }        
