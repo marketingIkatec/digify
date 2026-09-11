@@ -85,7 +85,12 @@ class LeadAppController extends Controller
                     ->paginate(10)
                     ->appends($request->all());
 
-        return view('admin.pages.leads.index')
+        $route = 'admin.pages.leads.index';            
+        if($routeName == 'admin.lead.api-digify'){
+            $route = 'admin.pages.leads.api-digify'; 
+        }            
+
+        return view($route)
                 ->with('leads', $leads)
                 ->with('formTypes', $formTypes ?? [])
                 ->with('sortField', $sortField)
