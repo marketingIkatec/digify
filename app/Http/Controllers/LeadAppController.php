@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use App\Models\LeadWhatsApp;
 use App\Models\LeadContato;
 use App\Models\LeadCustomContato;
+use App\Models\AccountDigifyHubspot;
 use App\Models\Setting;
 use App\Models\FormHubSpot;
 use Exception;
@@ -43,32 +44,36 @@ class LeadAppController extends Controller
             $query = LeadContato::query();
         }else if($routeName == 'admin.lead.custom'){
             $query = LeadCustomContato::query();
+        }else if($routeName == 'admin.lead.api-digify'){
+            $query = AccountDigifyHubspot::query();
         }
 
         $queryGroup = clone $query;
         
-        $formTypes = $queryGroup
-            ->select('form_type')   // seleciona apenas a coluna
-            ->groupBy('form_type')  // agrupa por form_type
-            ->pluck('form_type');   // retorna somente os valores em uma Collection
+        if($routeName != 'admin.lead.api-digify'){
+            $formTypes = $queryGroup
+                ->select('form_type')   // seleciona apenas a coluna
+                ->groupBy('form_type')  // agrupa por form_type
+                ->pluck('form_type');   // retorna somente os valores em uma Collection
 
-        // Filtro por nome
-        if ($request->filled('nome')) {
-            $query->where('nome', 'like', '%' . $request->nome . '%');
-        }
+            // Filtro por nome
+            if ($request->filled('nome')) {
+                $query->where('nome', 'like', '%' . $request->nome . '%');
+            }
 
-        // Filtro por email
-        if ($request->filled('email')) {
-            $query->where('email', 'like', '%' . $request->email . '%');
-        }
+            // Filtro por email
+            if ($request->filled('email')) {
+                $query->where('email', 'like', '%' . $request->email . '%');
+            }
 
-        // Filtro por status
-        if ($request->filled('status') && $request->status !== 'todos') {
-            $query->where('status', $request->status);
-        }
-        // Filtro por status
-        if ($request->filled('form_type')) {
-            $query->where('form_type', $request->form_type);
+            // Filtro por status
+            if ($request->filled('status') && $request->status !== 'todos') {
+                $query->where('status', $request->status);
+            }
+            // Filtro por status
+            if ($request->filled('form_type')) {
+                $query->where('form_type', $request->form_type);
+            }
         }
 
         // Paginação com 10 por página
@@ -82,7 +87,7 @@ class LeadAppController extends Controller
 
         return view('admin.pages.leads.index')
                 ->with('leads', $leads)
-                ->with('formTypes', $formTypes)
+                ->with('formTypes', $formTypes ?? [])
                 ->with('sortField', $sortField)
                 ->with('sortDirection', $sortDirection);
     }

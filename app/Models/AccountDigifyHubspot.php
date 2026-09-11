@@ -34,4 +34,25 @@ class AccountDigifyHubspot extends Model
 
         $this->save();
     }
+
+    public function getExtraDataLabelsAttribute()
+    {
+         $labels = [];         
+        
+         if(!empty($this->properties)){
+            foreach($this->properties as $key => $value) {
+                if($value != '')
+                    $labels[$key] = $value;        
+            }
+         }
+         
+         $labels['data'] = $this->getCreatedAtBrAttribute();
+
+        return $labels;
+    }
+
+    public function getCreatedAtBrAttribute()
+    {
+        return $this->created_at ? $this->created_at->format('d/m/Y H:i') : null;
+    }
 }

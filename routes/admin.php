@@ -39,7 +39,12 @@ Route::prefix('admin')->middleware('auth', 'admin.permission')->group(function (
     Route::get('/lead/whatsapp', [LeadAppController::class, 'viewLead'])->name('admin.lead.whatsapp');
     Route::get('/lead/custom', [LeadAppController::class, 'viewLead'])->name('admin.lead.custom');
     Route::get('/lead/contato', [LeadAppController::class, 'viewLead'])->name('admin.lead.contato');
+    Route::get('/lead/api-digify', [LeadAppController::class, 'viewLead'])->name('admin.lead.api-digify');
     Route::get('/lead/report/', [LeadAppController::class, 'dashboard'])->name('admin.lead.report');
+    Route::get('/lead/report/api-digify/{item}', [LeadAppController::class, 'dashboardApiDigify'])->name('admin.report.api-digify')->where(['item' => '[0-9]+']);
+
+    
+
     Route::post('/lead/report/enviar-email', [LeadAppController::class, 'dashboard'])->name('admin.lead.report.email.send');
     
     Route::get('blogs/categoria', [BlogController::class, 'indexCategoria'])->name('admin.blog.categoria.index');

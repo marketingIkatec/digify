@@ -101,6 +101,10 @@ class RouteHelper
         if($base == 'admin.lead.contato'){
             $routes['report'] = 'admin.lead.contato.report';
         }
+
+        if($base == 'admin.lead.api-digify'){
+            $routes['report'] = '';
+        }
         
         if($base == 'admin.lead.contato' || $base == 'admin.lead.whatsapp' || $base == 'admin.lead.custom'){
             $routes['report'] = 'admin.lead.report';
