@@ -162,7 +162,7 @@ class DigifyHubspotService
             ],
             'account_receipt.created' => [
                 'property' => 'digify_account_receipt_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Acesso
@@ -176,11 +176,11 @@ class DigifyHubspotService
             ],
             'user_created' => [
                 'property' => 'digify_user_created',
-                'default'  => true,
+                'default'  => 1,
             ],
             'permission_group_created' => [
                 'property' => 'digify_permission_group_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Configuração
@@ -194,251 +194,281 @@ class DigifyHubspotService
             ],
             'stage_created' => [
                 'property' => 'digify_stage_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'stage_edited' => [
                 'property' => 'digify_stage_edited',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'stage_deleted' => [
                 'property' => 'digify_stage_deleted',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'dashboard_customized' => [
                 'property' => 'digify_dashboard_customized',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'proposal_template_created' => [
                 'property' => 'digify_proposal_template_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'lead_status_configured' => [
                 'property' => 'digify_lead_status_configured',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'lead_source_configured' => [
                 'property' => 'digify_lead_source_configured',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'loss_reason_configured' => [
                 'property' => 'digify_loss_reason_configured',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'call_outcome_configured' => [
                 'property' => 'digify_call_outcome_configured',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Módulos
             'module_added' => [
                 'property' => 'digify_module_added',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'module_removed' => [
                 'property' => 'digify_module_removed',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'module_first_access' => [
                 'property' => 'digify_module_first_access',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'module_used' => [
                 'property' => 'digify_module_used',
-                'default'  => true,
+                'default'  => 1,
             ],
 
             // Cadastros e importações
             'person_created' => [
                 'property' => 'digify_person_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'people_imported' => [
                 'property' => 'digify_people_imported',
-                'default'  => true,
+                'default'  => 1,
             ],
             'organization_created' => [
                 'property' => 'digify_organization_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'organizations_imported' => [
                 'property' => 'digify_organizations_imported',
-                'default'  => true,
+                'default'  => 1,
             ],
             'product_created' => [
                 'property' => 'digify_product_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'products_imported' => [
                 'property' => 'digify_products_imported',
-                'default'  => true,
+                'default'  => 1,
             ],
             'lead_created' => [
                 'property' => 'digify_lead_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'lead_imported' => [
                 'property' => 'digify_lead_imported',
-                'default'  => true,
+                'default'  => 1,
             ],
             'lead_captured' => [
                 'property' => 'digify_lead_captured',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'import_completed' => [
                 'property' => 'digify_import_completed',
-                'default'  => true,
+                'default'  => 1,
             ],
 
             // Vendas
             'deal_created' => [
                 'property' => 'digify_deal_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'deal_stage_changed' => [
                 'property' => 'digify_deal_stage_changed',
-                'default'  => true,
+                'default'  => 1,
             ],
             'deal_won' => [
                 'property' => 'digify_deal_won',
-                'default'  => true,
+                'default'  => 1,
             ],
             'deal_lost' => [
                 'property' => 'digify_deal_lost',
-                'default'  => true,
+                'default'  => 1,
             ],
             'loss_reason_selected' => [
                 'property' => 'digify_loss_reason_selected',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'task_created' => [
                 'property' => 'digify_task_created',
-                'default'  => true,
+                'default'  => 1,
             ],
             'task_completed' => [
                 'property' => 'digify_task_completed',
-                'default'  => true,
+                'default'  => 1,
             ],
             'note_created' => [
                 'property' => 'digify_note_created',
-                'default'  => true,
+                'default'  => 1,
             ],
             'mention_created' => [
                 'property' => 'digify_mention_created',
-                'default'  => true,
+                'default'  => 1,
             ],
 
             // Propostas e preços
             'proposal_created' => [
                 'property' => 'digify_proposal_created',
-                'default'  => true,
+                'default'  => 1,
             ],
             'proposal_sent' => [
                 'property' => 'digify_proposal_sent',
-                'default'  => true,
+                'default'  => 1,
             ],
             'proposal_viewed' => [
                 'property' => 'digify_proposal_viewed',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'proposal_accepted' => [
                 'property' => 'digify_proposal_accepted',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'proposal_rejected' => [
                 'property' => 'digify_proposal_rejected',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'price_table_created' => [
                 'property' => 'digify_price_table_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'price_table_applied' => [
                 'property' => 'digify_price_table_applied',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Documentos e projetos
             'document_uploaded' => [
                 'property' => 'digify_document_uploaded',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'document_linked_to_deal' => [
                 'property' => 'digify_document_linked_to_deal',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'project_created' => [
                 'property' => 'digify_project_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'project_linked_to_deal' => [
                 'property' => 'digify_project_linked_to_deal',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Analytics
             'dashboard_viewed' => [
                 'property' => 'digify_dashboard_viewed',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'report_viewed' => [
                 'property' => 'digify_report_viewed',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'pipeline_analytics_viewed' => [
                 'property' => 'digify_pipeline_analytics_viewed',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'forecast_viewed' => [
                 'property' => 'digify_forecast_viewed',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'sales_goal_created' => [
                 'property' => 'digify_sales_goal_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Automação, manuais e API
             'automation_created' => [
                 'property' => 'digify_automation_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'automation_activated' => [
                 'property' => 'digify_automation_activated',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'automation_executed' => [
                 'property' => 'digify_automation_executed',
-                'default'  => true,
+                'default'  => 1,
             ],
             'business_manual_created' => [
                 'property' => 'digify_business_manual_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'business_manual_used' => [
                 'property' => 'digify_business_manual_used',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'api_token_created' => [
                 'property' => 'digify_api_token_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'api_request_success' => [
                 'property' => 'digify_api_request_success',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'webhook_created' => [
                 'property' => 'digify_webhook_created',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
             'webhook_triggered' => [
                 'property' => 'digify_webhook_triggered',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
             ],
 
             // Integrações
             'digisac_connected' => [
                 'property' => 'digify_digisac_connected',
-                'default'  => true,
+                'default'  => date('d/m/Y H:i:s'),
+            ],
+
+            // Financeiro
+            'payment_method_added' => [
+                'property' => 'digify_payment_method_added',
+                'default'  => date('d/m/Y H:i:s'),
+            ],
+            'first_payment_confirmed' => [
+                'property' => 'digify_first_payment_confirmed',
+                'default'  => date('d/m/Y H:i:s'),
+            ],
+            'first_payment_failed' => [
+                'property' => 'digify_first_payment_failed',
+                'default'  => date('d/m/Y H:i:s'),
+            ],
+            'recurring_payment_confirmed' => [
+                'property' => 'digify_recurring_payment_confirmed',
+                'default'  => date('d/m/Y H:i:s'),
+            ],
+            'recurring_payment_failed' => [
+                'property' => 'digify_recurring_payment_failed',
+                'default'  => 1,
+            ],
+            'recurring_payment_recovered' => [
+                'property' => 'digify_recurring_payment_recovered',
+                'default'  => date('d/m/Y H:i:s'),
+            ],
+            'subscription_cancelled' => [
+                'property' => 'digify_subscription_cancelled',
+                'default'  => date('d/m/Y H:i:s'),
             ],
         ];
     }
