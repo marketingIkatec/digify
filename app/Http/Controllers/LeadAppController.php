@@ -25,7 +25,6 @@ use App\Models\Visitas;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\FormHubSpot;
-use App\Events\LeadInteligeniaComercial;
 use Exception;
 
 class LeadAppController extends Controller
