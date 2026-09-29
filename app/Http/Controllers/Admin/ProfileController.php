@@ -16,6 +16,9 @@ use App\Models\PermissionAdmin;
 use App\Models\MenuAdmin;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use App\Mail\UserCredentialsMail;
 
 class ProfileController extends Controller
 {
@@ -81,15 +84,21 @@ class ProfileController extends Controller
     public function settingUserStore(ProfileRequest $request)
     {         
 
-    
+        $userData = [
+            'name' => $request->name,
+            'page_only' => $request->page_only,
+            'email' => $request->email,
+            'is_master_admin' => $request->is_master_admin ?? false,
+        ];
+
+        if ($request->password) {
+            $userData['password'] = Hash::make($request->password);
+            $userData['temporary_password'] = false;
+        }
+
         $user = User::updateOrCreate(
             ['id' => $request->id ?? null],
-            [
-                'name' => $request->name,
-                'email' => $request->email,
-                'is_master_admin' => $request->is_master_admin ?? false,
-                $request->password ? 'password' : '' => $request->password ? Hash::make($request->password) : null,
-            ]
+            $userData
         );
 
         // limpa permissões antigas
@@ -111,6 +120,29 @@ class ProfileController extends Controller
         }
 
         return redirect()->route('admin.setting.user.index', ['name' => $user->email])->with('success', 'Atualizado!');
+    }
+
+    public function sendCredentials(User $item)
+    {
+        if (!auth()->user()?->is_master_admin) {
+            abort(403);
+        }
+
+        $password = Str::password(12);
+        $item->password = Hash::make($password);
+        $item->temporary_password = true;
+        $item->save();
+
+        Mail::to($item->email)->send(new UserCredentialsMail(
+            name: $item->name,
+            email: $item->email,
+            password: $password,
+            loginUrl: env('APP_URL').'/admin'
+        ));
+
+        return redirect()
+            ->route('admin.setting.user.index', ['name' => $item->email])
+            ->with('success', 'Usuário e senha enviados por e-mail.');
     }
 
     /**

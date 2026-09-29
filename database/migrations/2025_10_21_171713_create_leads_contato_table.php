@@ -23,6 +23,7 @@ return new class extends Migration
             $table->json('extra_data')->nullable();
             $table->longText('mensagem')->nullable();
             $table->integer('status')->default(0);            
+            $table->integer('visita_id')->nullable();           
             $table->timestamps();
         });
     }

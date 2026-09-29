@@ -15,9 +15,20 @@
             <livewire:admin-status-model
                 :item="$item"
                 field="status"
-                :routeName="Route::currentRouteName()"
                 :wire:key="'status-'.$item->id"
             />
+        </td>
+    @endif
+    @if(Route::currentRouteName() === 'admin.setting.user.index')
+        <td class="img-action w1">
+            @if(auth()->user()?->is_master_admin)
+                <form method="POST" action="{{ route('admin.setting.user.send.credentials', $item) }}" class="js-send-user-credentials" data-email="{{ $item->email }}">
+                    @csrf
+                    <button type="submit" class="btn btn-sm" title="Enviar acesso por e-mail">
+                        <img src="{{ asset('build/images/admin/mail-inbox.png') }}" title="Enviar acesso por e-mail">
+                    </button>
+                </form>
+            @endif
         </td>
     @endif
     <td class="img-action w1">
@@ -31,7 +42,6 @@
     <td class="img-action w1">
          <livewire:admin-delete-model
             :item="$item"
-            :routeName="Route::currentRouteName()"
             :wire:key="'delete-'.$item->id"
         />
     </td>

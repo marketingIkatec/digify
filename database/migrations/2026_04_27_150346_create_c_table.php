@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leadsWhatsapp', function (Blueprint $table) {
+        Schema::create('leadsCustomContato', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->string('email');
-            $table->string('whatsapp');
-            $table->string('url')->nullable();
-            $table->string('voce_e_cliente')->nullable();
+            $table->string('nome')->nullable();
+            $table->string('email')->nullable();
+            $table->string('whatsapp')->nullable();
             $table->string('form_type')->nullable();
-            $table->string('locale')->nullable();
             $table->json('extra_data')->nullable();
-            $table->longText('mensagem')->nullable();
+            $table->string('locale')->nullable();
             $table->integer('status')->default(0);
             $table->integer('visita_id')->nullable();       
             $table->timestamps();
@@ -33,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leadsWhatsapp');
+        Schema::dropIfExists('leadsCustomContato');
     }
 };

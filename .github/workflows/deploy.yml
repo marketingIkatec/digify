@@ -40,6 +40,9 @@ jobs:
             echo "Executando migrations..."
             php artisan migrate --force
 
+            echo "Executando migrations..."
+            php artisan migrate --force
+
             echo "Gerando caches do Laravel..."
             php artisan config:cache
             php artisan route:cache

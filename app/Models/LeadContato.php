@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Visitas;
 
 class LeadContato extends Model
 {
@@ -18,6 +19,7 @@ class LeadContato extends Model
         'form_type',
         'locale',
         'mensagem',
+        'visita_id'
     ];
 
     // Campos que **não** devem aparecer no JSON
@@ -33,6 +35,10 @@ class LeadContato extends Model
 
     protected $appends = ['status_label', 'created_at_br'];
 
+    public function visita(){
+        return $this->belongsTo(Visitas::class, 'visita_id');
+    }
+
     public function getStatusLabelAttribute()
     {
         return match($this->status) {
@@ -46,7 +52,7 @@ class LeadContato extends Model
     {
          $labels = [];
          $labels['nome'] = $this->nome;
-         $labels['email'] = "<a href='".route('admin.view-contato-hubspot', ['email' => $this->email])."' target='_blank' style='color: #0a50ff;text-decoration: underline;font-weight: bold;'>".$this->email."</a>";
+         $labels['email'] = $this->email;
          $labels['whatsapp'] = $this->whatsapp;
          $labels['form_type'] = $this->form_type;
          $labels['url'] = $this->url;
@@ -63,9 +69,19 @@ class LeadContato extends Model
             }
          }
          
+         $labels['locale'] = $this->getLocaleLabelAttribute();
          $labels['data'] = $this->getCreatedAtBrAttribute();
          $labels['status'] = $this->getStatusLabelAttribute();
         return $labels;
+    }
+
+    public function getLocaleLabelAttribute()
+    {
+        return match($this->locale) {
+            'pt' => 'Português',
+            'es' => 'Espanhol',
+            'en' => 'Inglês',
+        };
     }
 
     public function getVoceEClienteLabelAttribute()

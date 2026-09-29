@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('cidade')->nullable();
             $table->string('pagina')->nullable();
             $table->string('pagina_id')->nullable();
+            $table->integer('visita_id')->nullable();
+            $table->longText('url_query')->nullable();
             $table->datetime('data')->nullable();
         });
     }

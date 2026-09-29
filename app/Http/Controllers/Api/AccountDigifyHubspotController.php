@@ -105,4 +105,29 @@ class AccountDigifyHubspotController extends Controller
             'data'    => $account,
         ], 200);
     }
+
+    public function viewLead(Request $request){        
+    
+        $query = AccountDigifyHubspot::query();       
+
+        $queryGroup = clone $query;
+
+        // Paginação com 10 por página
+        // Ordenação
+        $sortField = $request->get('sort', 'id');
+        $sortDirection = $request->get('direction', 'desc');
+
+        $leads = $query->orderBy($sortField, $sortDirection)
+                    ->paginate(10)
+                    ->appends($request->all());
+
+        
+        $route = 'admin.pages.leads.api-digify'; 
+        
+        return view($route)
+                ->with('leads', $leads)
+                ->with('formTypes', $formTypes ?? [])
+                ->with('sortField', $sortField)
+                ->with('sortDirection', $sortDirection);
+    }
 }

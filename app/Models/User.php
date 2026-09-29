@@ -23,7 +23,9 @@ class User extends Authenticatable
         'email',
         'password',
         'is_master_admin',
+        'temporary_password',
         'last_login',
+        'page_only'
 
     ];
 
@@ -47,6 +49,7 @@ class User extends Authenticatable
         'last_login' => 'datetime',
         'password' => 'hashed',
         'is_master_admin' => 'boolean',
+        'temporary_password' => 'boolean',
     ];
 
     public function permissions()

@@ -129,7 +129,28 @@
         </div>
     </div>
 
-    <div class="mt-6 flex items-center gap-2">
+    <div class="row mb-5">
+        <div class="col-md-12 space-y-6">
+            <div class="bg-white shadow-sm sm:rounded-lg h-100">                
+                <div class="bg-gray-800 rounded-top p-1">
+                    <span class="title ps-2 text-white text-lg font-medium">
+                        <i class="fa fa-list"></i> 
+                        Apenas na pagina
+                    </span>
+                </div>
+                <div class="p-4 sm:p-8">
+                    <div class="row">                    
+                        <div class="col-md-6 mb-3">
+                            <input type="text" placeholder="Digite a página" name="page_only" class="form-control @error('page_only') is-invalid @enderror" value="{{ old('page_only', $item->page_only ?? '') }}">
+                            @error('page_only') <div class="invalid-feedback"> {{ $message }} </div> @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex items-center gap-4">
         <a href="{{ route('admin.setting.user.index') }}" class="btn btn-secondary">Voltar</a>
         <button type="submit" class="btn btn-primary">Salvar</button>
     </div>

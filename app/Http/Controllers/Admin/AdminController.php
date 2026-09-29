@@ -9,11 +9,33 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use App\Services\VisitasService;
 use App\Models\Visitas;
+use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
+    public function indexOpenIa(OpenAIService $openAI)
+    {
+        $inicio = microtime(true);
+        $resposta = $openAI->ask(
+            "Encontre o CNPJ da empresa tilibra.com.br"
+        ); 
+        Log::info('Tempo OpenAI', [
+            'tempo' => microtime(true) - $inicio
+        ]);
+
+        dd($resposta);
+    }
+
     public function dashboard(Request $request)
     {
+    
+        $user = Auth::user();
+        if($user->page_only){
+            return redirect()->away($user->page_only);
+        }
+
         $visitasObj = new VisitasService();
         $graficos = $visitasObj->getGrafico();
 

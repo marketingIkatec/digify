@@ -18,6 +18,8 @@ class Visitas extends Model
         'cidade', 
         'pagina', 
         'pagina_id', 
+        'url_query',
+        'visita_id',
         'data'
     ];
     protected $casts = [

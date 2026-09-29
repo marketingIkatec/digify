@@ -9,6 +9,7 @@ use App\Models\BlogCategoria;
 use App\Models\BlogAutor;
 use App\Models\Visitas;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class VisitasService
 {
@@ -16,6 +17,7 @@ class VisitasService
 	public $paginaId = '';
 	public $pagina = '';
 	public $location = [];
+	public $url_query = '';
 	
 	public function __construct() {
 		
@@ -26,7 +28,7 @@ class VisitasService
 		$this->paginaId = $this->getPaginaId();
 		$this->ip       = $this->getClientIp();
 		$this->location = $this->getLocationFromIp();
-		
+		$this->url_query = request()->getQueryString();
 		$this->saveVisita();
 	}
 
@@ -48,7 +50,9 @@ class VisitasService
 		$slug  = str_replace("blog/", "", implode('/', $this->pagina));
 
 		switch($slug){
-			case 'index' : $this->pagina = ['index']; return 1; break;
+			case 'index' : $this->pagina = ['pt/index']; return 1; break;
+			case 'es'    : $this->pagina = ['es/index']; return 134; break;
+			case 'en'    : $this->pagina = ['en/index']; return 135; break;
 		}
 		
 		$obj = getPageBySlug($slug);
@@ -77,6 +81,7 @@ class VisitasService
 				if(count($queryVisita) == 0){
 					$dados = [];
 					$dados['ip'] = $this->ip;
+					$dados['url_query'] = $this->url_query ?? '';
 					if(!empty($this->location)){
 						$dados['pais']      = $this->location['pais'];
 						$dados['regiao']    = $this->location['regiao'];
@@ -89,8 +94,30 @@ class VisitasService
 					}
 					$dados['pagina']    = substr($pagina, 0, 255);
 					$dados['data']      = date('Y-m-d H:i:s');
+					if (session()->has('visita_id')) {
+						$dados['visita_id'] = session('visita_id');
+					}
 
-					DB::table('visitas')->insert($dados);
+					//DB::table('visitas')->insert($dados);
+					//$visita_id = DB::table('visitas')->insertGetId($dados);
+					//if (!session()->has('visita_id')) {
+					//	session()->put('visita_id', $visita_id);
+					//}
+
+					try {
+						$visita_id = DB::table('visitas')->insertGetId($dados);
+
+						if (!session()->has('visita_id')) {
+						  session()->put('visita_id', $visita_id);
+					    }
+
+					} catch (\Throwable $e) {
+
+						Log::error('❌ ERRO AO SALVAR VISITA', [
+							'dados' => $dados,
+							'erro' => $e->getMessage(),
+						]);
+					}
 				}  
 			}  
 		}  
@@ -189,7 +216,10 @@ class VisitasService
 			$where[] = " data <= '".$_GET['dataFinal']." 23:59:59'";
 		}
 
-		$query = DB::select("SELECT COUNT(id) AS total, pagina, pagina_id 
+		$query = DB::select("SELECT COUNT(id) AS total,
+								  SUM(CASE WHEN url_query IS NULL OR TRIM(url_query) = '' THEN 1 ELSE 0 END) AS organico,
+								  SUM(CASE WHEN url_query IS NOT NULL AND TRIM(url_query) != '' THEN 1 ELSE 0 END) AS campanha,
+								  pagina, pagina_id 
 								  FROM visitas
 								  ".(!empty($where) ? " WHERE ".implode(" AND ", $where) : "")." 
 								  GROUP BY pagina, pagina_id order by total desc LIMIT 10");
@@ -198,6 +228,8 @@ class VisitasService
 		foreach($query as $result){
 			$totalVisitas += $result->total;
 			$dadosGrafico[$i]['total']  = $result->total;
+			$dadosGrafico[$i]['organico'] = $result->organico;
+			$dadosGrafico[$i]['campanha'] = $result->campanha;
 
 			if($result->pagina_id && $result->pagina){
 				$campo = "";

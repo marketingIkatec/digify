@@ -49,7 +49,7 @@ class LeadCustomContato extends Model
     {
          $labels = [];
          $labels['nome'] = $this->nome;
-         $labels['email'] = "<a href='".route('admin.inteligencia.index', ['alvo' => $this->email])."' target='_blank' style='color: #0a50ff;text-decoration: underline;font-weight: bold;'>".$this->email."</a>";
+         $labels['email'] = $this->email;
          $labels['whatsapp'] = $this->whatsapp;
          $labels['form_type'] = $this->form_type;
          $labels['url'] = $this->url;

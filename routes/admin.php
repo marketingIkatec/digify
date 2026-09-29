@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\LeadAppController;
 use App\Http\Controllers\Admin\UploadFilesController;
+use App\Http\Controllers\Api\AccountDigifyHubspotController;
 use App\Services\HubspotCampaignService;
 use Illuminate\Support\Facades\Route;
 use App\Models\LeadContato;
@@ -39,9 +40,9 @@ Route::prefix('admin')->middleware('auth', 'admin.permission')->group(function (
     Route::get('/lead/whatsapp', [LeadAppController::class, 'viewLead'])->name('admin.lead.whatsapp');
     Route::get('/lead/custom', [LeadAppController::class, 'viewLead'])->name('admin.lead.custom');
     Route::get('/lead/contato', [LeadAppController::class, 'viewLead'])->name('admin.lead.contato');
-    Route::get('/lead/api-digify', [LeadAppController::class, 'viewLead'])->name('admin.lead.api-digify');
+    Route::get('/lead/api-digify', [AccountDigifyHubspotController::class, 'viewLead'])->name('admin.lead.api-digify');
     Route::get('/lead/report/', [LeadAppController::class, 'dashboard'])->name('admin.lead.report');
-    Route::get('/lead/report/api-digify/{item}', [LeadAppController::class, 'dashboardApiDigify'])->name('admin.report.api-digify')->where(['item' => '[0-9]+']);
+    Route::get('/lead/report/api-digify/{item}', [AccountDigifyHubspotController::class, 'dashboardApiDigify'])->name('admin.report.api-digify')->where(['item' => '[0-9]+']);
 
     
 
@@ -77,6 +78,7 @@ Route::prefix('admin')->middleware('auth', 'admin.permission')->group(function (
     Route::get('setting/user/create', [ProfileController::class, 'settingUserCreate'])->name('admin.setting.user.create');
     Route::get('setting/user/edit/{item}', [ProfileController::class, 'settingUserEdit'])->name('admin.setting.user.edit')->where(['item' => '[0-9]+']);
     Route::post('/setting/user/store', [ProfileController::class, 'settingUserStore'])->name('admin.setting.user.store');
+    Route::post('/setting/user/{item}/send-credentials', [ProfileController::class, 'sendCredentials'])->name('admin.setting.user.send.credentials')->where(['item' => '[0-9]+']);
 
     //Route::get('/site', [SiteController::class, 'index'])->name('admin.site');
     //Route::resource('site', SiteController::class);
