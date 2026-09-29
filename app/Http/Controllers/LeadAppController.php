@@ -445,8 +445,6 @@ class LeadAppController extends Controller
                     ]);
                 }
                 
-                event(new LeadInteligeniaComercial($lead));
-                
                 $thanksPage = true;
                 if($formHubSpot->form_sent == 'aba2'){ // abre uma nova aba do popup
                     return response()->json([
