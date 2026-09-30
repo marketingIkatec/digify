@@ -22,8 +22,11 @@ class PasswordController extends Controller
 
         $request->user()->update([
             'password' => Hash::make($validated['password']),
+            'temporary_password' => false,
         ]);
 
-        return back()->with('status', 'password-updated');
+        return back()
+            ->with('status', 'password-updated')
+            ->with('success', 'Senha alterada com sucesso!');
     }
 }

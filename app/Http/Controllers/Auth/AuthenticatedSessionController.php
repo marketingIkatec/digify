@@ -35,6 +35,10 @@ class AuthenticatedSessionController extends Controller
             'last_login' => now(),
         ]);
 
+        if ($user->temporary_password) {
+            return redirect()->route('profile.editar');
+        }
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 
