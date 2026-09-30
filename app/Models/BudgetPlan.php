@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class BudgetPlan extends Model
 {
-    protected $fillable = ['key', 'name', 'price', 'details', 'sort_order', 'active'];
+    protected $fillable = ['key', 'name', 'price', 'price_annual', 'details', 'sort_order', 'active'];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'price_annual' => 'decimal:2',
         'details' => 'array',
         'active' => 'boolean',
     ];

@@ -205,6 +205,33 @@
 
     .plan-pills { display: flex; gap: 5px; flex-wrap: wrap; }
 
+    .billing-toggle {
+        display: inline-flex;
+        gap: 4px;
+        margin-top: 10px;
+        padding: 4px;
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        background: var(--color-bg-2);
+    }
+
+    .billing-option {
+        padding: 5px 12px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        font-size: var(--font-size-2xs);
+        font-weight: var(--font-weight-bold);
+        transition: all var(--transition-fast);
+    }
+
+    .billing-option.active {
+        background: var(--sc);
+        color: #fff;
+    }
+
 
     .plan-pill {
         padding: 4px 10px;
@@ -576,6 +603,21 @@ function extraQty(plan, key, value) {
   return Math.max(0, Number(value || 0) - planInitialCount(plan, key));
 }
 
+function scenarioPlanPrice(sc) {
+  const p = PLANS[sc.plan];
+  if (!p) return null;
+
+  if (sc.billing === 'annual') {
+    return p.price_annual === null || p.price_annual === undefined ? null : Number(p.price_annual);
+  }
+
+  return p.price === null || p.price === undefined ? null : Number(p.price);
+}
+
+function billingText(sc) {
+  return sc.billing === 'annual' ? 'anual' : 'mensal';
+}
+
 function initialPlanUsers(plan) {
   const max = planMaxUsers(plan);
   return max !== null ? max : planMinUsers(plan);
@@ -588,6 +630,7 @@ function newScenario(name, plan) {
     id: nextId++,
     name,
     plan: initialPlan,
+    billing: 'monthly',
     users: initialUsers,
     digisac: false,
     workspaces: planInitialCount(initialPlan, 'workspaces'),
@@ -620,11 +663,11 @@ function duplicateScenario(id) {
   render();
 }
 function calcTotal(sc) {
-  const p=PLANS[sc.plan]; if(!p||p.price===null) return null;
+  const p=PLANS[sc.plan], basePrice=scenarioPlanPrice(sc); if(!p||basePrice===null) return null;
   const ep=EXTRA_PRICES[sc.plan] || {};
   const digisacPrice = Number((PLANS[sc.plan].details && PLANS[sc.plan].details.digisac_user_price) || 0);
   const disc=sc.digisac ? digisacPrice : 0;
-  let total=Math.max(0,p.price-disc)*sc.users;
+  let total=Math.max(0,basePrice-disc)*sc.users;
   if(sc.plan!=='free'){
     const workspaces = extraQty(sc.plan, 'workspaces', sc.workspaces);
     const pipelines = extraQty(sc.plan, 'pipelines', sc.pipelines);
@@ -640,7 +683,7 @@ function fmt(v){ return 'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3}
 
 function detailLabel(key) {
   const labels = {
-    annual_price: 'Preço anual',
+    billing_price: 'Preço por usuário',
     users_min: 'Usuários mínimos',
     users_max: 'Usuários máximos',
     leads: 'Leads',
@@ -671,7 +714,7 @@ function detailValue(value) {
 }
 
 function detailDisplay(key, value) {
-  if (key === 'annual_price') {
+  if (key === 'billing_price') {
     return (value === null || value === undefined) ? 'Sob consulta' : `${fmt(Number(value))}/user`;
   }
 
@@ -729,15 +772,15 @@ function compareSelectedModules(sc) {
 
 function renderPlanDetails(sc) {
   const d = (PLANS[sc.plan] && PLANS[sc.plan].details) ? PLANS[sc.plan].details : {};
-  const keys = ['annual_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipelines', 'pipeline_steps', 'dashboards', 'workspaces', 'storage', 'automations', 'api_rest', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support', 'digisac_user_price'];
+  const keys = ['billing_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipelines', 'pipeline_steps', 'dashboards', 'workspaces', 'storage', 'automations', 'api_rest', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support', 'digisac_user_price'];
 
   return `
     <div class="plan-details">
       ${keys.map((key) => `
         ${(key === 'digisac_user_price' && Number(d[key] || 0) === 0) ? '' : `
         <div class="plan-detail">
-          <span class="k">${detailLabel(key)}</span>
-          <span class="v">${planDetailDisplay(sc.plan, key, d[key])}</span>
+          <span class="k">${key === 'billing_price' ? `Preço ${billingText(sc)}` : detailLabel(key)}</span>
+          <span class="v">${planDetailDisplay(sc.plan, key, key === 'billing_price' ? scenarioPlanPrice(sc) : d[key])}</span>
         </div>
       `}
       `).join('')}
@@ -759,8 +802,10 @@ function renderColumns() {
   wrap.innerHTML=scenarios.map((sc,idx)=>{
     const total=calcTotal(sc), isWinner=total!==null&&total===minTotal&&totals.length>1;
     const ep=EXTRA_PRICES[sc.plan]||EXTRA_PRICES.starter;
-    const isConsult = PLANS[sc.plan].price === null;
+    const basePrice = scenarioPlanPrice(sc);
+    const isConsult = basePrice === null;
     const planPills=Object.entries(PLANS).map(([k,v])=>`<button class="plan-pill${sc.plan===k?' active':''}" onclick="setPlan(${sc.id},'${k}')">${v.name}</button>`).join('');
+    const billingToggle=`<div class="billing-toggle" aria-label="Tipo de cobrança"><button class="billing-option${sc.billing==='monthly'?' active':''}" onclick="setBilling(${sc.id},'monthly')">Mensal</button><button class="billing-option${sc.billing==='annual'?' active':''}" onclick="setBilling(${sc.id},'annual')">Anual</button></div>`;
     const modChips=MODULES.map(m=>{
       const isIncl=m.included.includes(sc.plan), isAct=sc.modules[m.id];
       const cls=isIncl?'included':isAct?'active':'';
@@ -770,11 +815,11 @@ function renderColumns() {
     }).join('');
     const digisacPrice = Number((PLANS[sc.plan].details && PLANS[sc.plan].details.digisac_user_price) || 0);
     const disc=sc.digisac ? digisacPrice : 0;
-    const netPPU=Math.max(0,(PLANS[sc.plan].price||0)-disc);
+    const netPPU=Math.max(0,(basePrice||0)-disc);
     const totalStr=total===null?'Sob consulta':fmt(total);
     let bRows = isConsult
       ? `<div class="sc-breakdown-row"><span>Valor</span><span class="bv">Sob consulta</span></div>`
-      : `<div class="sc-breakdown-row"><span>Plano (${sc.users} user${sc.users>1?'s':''} × ${fmt(netPPU)})</span><span class="bv">${fmt(netPPU*sc.users)}</span></div>`;
+      : `<div class="sc-breakdown-row"><span>Plano ${billingText(sc)} (${sc.users} user${sc.users>1?'s':''} × ${fmt(netPPU)})</span><span class="bv">${fmt(netPPU*sc.users)}</span></div>`;
     if(!isConsult && sc.digisac) bRows+=`<div class="sc-breakdown-row"><span>Desconto Digisac</span><span class="bv" style="color:var(--green)">−${fmt(disc*sc.users)}</span></div>`;
     if(!isConsult && sc.plan!=='free') {
       const workspaces = extraQty(sc.plan, 'workspaces', sc.workspaces);
@@ -820,6 +865,7 @@ function renderColumns() {
       </div>
     </div>
     <div class="plan-pills">${planPills}</div>
+    ${billingToggle}
     ${renderPlanDetails(sc)}
   </div>
   <div class="sc-body">
@@ -846,7 +892,7 @@ function renderColumns() {
     </div>` : ''}
   </div>
   <div class="sc-footer">
-    <div class="sc-total-label">Total mensal estimado</div>
+    <div class="sc-total-label">Total mensal estimado (${billingText(sc)})</div>
     <div class="sc-total-val${isWinner?' highlight':''}">${totalStr}</div>
     <div class="sc-breakdown">${bRows}</div>
     ${isWinner?`<div class="winner-badge">✓ Menor custo</div>`:''}
@@ -873,7 +919,7 @@ function renderCompareTable(){
   const cols=scenarios.length+1;
   let h=`<thead><tr><th>Comparativo</th>`;
   const colors=['var(--c0)','var(--c1)','var(--c2)'];
-  scenarios.forEach((sc,i)=>{ h+=`<th style="color:${colors[i]}">${sc.name}<br><span style="font-weight:400;color:var(--ink4)">${PLANS[sc.plan].name}</span></th>`; });
+  scenarios.forEach((sc,i)=>{ h+=`<th style="color:${colors[i]}">${sc.name}<br><span style="font-weight:400;color:var(--ink4)">${PLANS[sc.plan].name} (${billingText(sc)})</span></th>`; });
   h+=`</tr></thead><tbody>`;
   h+=`<tr class="section-row"><td colspan="${cols}">Custo mensal</td></tr>`;
   h+=`<tr><td>Total / mês</td>`;
@@ -894,13 +940,13 @@ function renderCompareTable(){
   }
   h+=`<tr class="section-row"><td colspan="${cols}">Detalhes do plano</td></tr>`;
   const digisacVisible = scenarios.some(sc => Number((PLANS[sc.plan].details && PLANS[sc.plan].details.digisac_user_price) || 0) > 0);
-  const detailKeys = ['annual_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipeline_steps', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support'];
+  const detailKeys = ['billing_price', 'users_min', 'users_max', 'leads', 'contacts', 'pipeline_steps', 'webhooks', 'integrations', 'permissions', 'mobile_app', 'support'];
   if (digisacVisible) detailKeys.push('digisac_user_price');
   detailKeys.forEach((key) => {
     h+=`<tr><td>${detailLabel(key)}</td>`;
     scenarios.forEach((sc) => {
       const d = (PLANS[sc.plan] && PLANS[sc.plan].details) ? PLANS[sc.plan].details : {};
-      const value = d[key];
+      const value = key === 'billing_price' ? scenarioPlanPrice(sc) : d[key];
       const txt = detailDisplay(key, value);
       const cell = (key === 'digisac_user_price' && Number(value || 0) === 0)
         ? '<span class="check-no">—</span>'
@@ -963,6 +1009,7 @@ function setPlan(id,plan){
     render();
   }
 }
+function setBilling(id,billing){const sc=scenarios.find(s=>s.id===id);if(sc){sc.billing=billing;render();}}
 function setName(id,name){const sc=scenarios.find(s=>s.id===id);if(sc){sc.name=name;renderCompareTable();}}
 function toggleDigisac(id){const sc=scenarios.find(s=>s.id===id);if(sc){sc.digisac=!sc.digisac;render();}}
 function changeVal(id,key,delta,min,max){const sc=scenarios.find(s=>s.id===id);if(sc){const next=Math.max(min,sc[key]+delta);sc[key]=max !== null && max !== undefined ? Math.min(max,next) : next;render();}}

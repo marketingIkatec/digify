@@ -20,8 +20,8 @@ class BudgetCalculatorSeeder extends Seeder
                 'key' => 'free',
                 'name' => 'Free',
                 'price' => 0,
+                'price_annual' => 0,
                 'details' => [
-                    'annual_price' => 0,
                     'users_min' => 1,
                     'users_max' => 3,
                     'leads' => '500',
@@ -46,8 +46,8 @@ class BudgetCalculatorSeeder extends Seeder
                 'key' => 'starter',
                 'name' => 'Starter',
                 'price' => 49,
+                'price_annual' => 46,
                 'details' => [
-                    'annual_price' => 46,
                     'users_min' => 4,
                     'users_max' => null,
                     'leads' => '10.000',
@@ -72,8 +72,8 @@ class BudgetCalculatorSeeder extends Seeder
                 'key' => 'growth',
                 'name' => 'Growth ⭐',
                 'price' => 69,
+                'price_annual' => 62,
                 'details' => [
-                    'annual_price' => 62,
                     'users_min' => 4,
                     'users_max' => null,
                     'leads' => '100.000',
@@ -98,8 +98,8 @@ class BudgetCalculatorSeeder extends Seeder
                 'key' => 'pro',
                 'name' => 'Pro',
                 'price' => 99,
+                'price_annual' => 85,
                 'details' => [
-                    'annual_price' => 85,
                     'users_min' => 4,
                     'users_max' => null,
                     'leads' => 'Ilimitado',
@@ -124,8 +124,8 @@ class BudgetCalculatorSeeder extends Seeder
                 'key' => 'enterprise',
                 'name' => 'Enterprise',
                 'price' => null,
+                'price_annual' => null,
                 'details' => [
-                    'annual_price' => null,
                     'users_min' => 10,
                     'users_max' => null,
                     'leads' => 'Ilimitado',
