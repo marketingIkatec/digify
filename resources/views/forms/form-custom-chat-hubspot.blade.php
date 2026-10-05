@@ -1,8 +1,8 @@
 @php
-  $apiHubspot = new \App\Services\HubspotCampaignService(); 
-  $fields = $apiHubspot->listForm($formHubSpot->id ?? null);
+    $apiHubspot = new \App\Services\HubspotCampaignService();
+    $fields = $apiHubspot->listForm($formHubSpot->id ?? null);
 
-  $ignoredFields = [
+    $ignoredFields = [
         'utm_campaign',
         'utm_source',
         'utm_medium',
@@ -13,7 +13,7 @@
         'fbclid',
         'msclkid',
         'outros_segmento',
-        'lastname'
+        'lastname',
     ];
 
     $chatFields = collect($formHubSpot['form_fields'])
@@ -35,34 +35,38 @@
     $pagePolitica = getPageById(__('pages.politica_de_privacidade'));
     //Termos de Uso
     $pageTermos = getPageById(__('pages.termos_de_uso'));
-        
-    if(!empty($pagePolitica)){
-        $termos .= '<a href="'.route('site.show', $pagePolitica->slug).'" target="_blank">'.$pagePolitica->titulo.'</a> e ';
-    } 
-    if(!empty($pageTermos)){
-        $termos .= '<a href="'.route('site.show', $pageTermos->slug).'" target="_blank">'.$pageTermos->titulo.'</a>.'; 
-    } 
+
+    if (!empty($pagePolitica)) {
+        $termos .=
+            '<a href="' .
+            route('site.show', $pagePolitica->slug) .
+            '" target="_blank">' .
+            $pagePolitica->titulo .
+            '</a> e ';
+    }
+    if (!empty($pageTermos)) {
+        $termos .=
+            '<a href="' . route('site.show', $pageTermos->slug) . '" target="_blank">' . $pageTermos->titulo . '</a>.';
+    }
 
 @endphp
 
-<style>
-    
-</style>
-
-@if(!empty($formHubSpot) && !empty($fields['saidaHtml']))
+@if (!empty($formHubSpot) && !empty($fields['saidaHtml']))
     <div class="chat">
         <div id="messages" class="chat-messages"></div>
         <div class="chat-footer">
-            <input
-                type="text"
-                id="answer"
-                placeholder="{{__('forms.enter_your_answer')}}"
-                autocomplete="off">
+            <input type="text" id="answer" placeholder="{{ __('forms.enter_your_answer') }}" autocomplete="off">
 
             <select id="answerSelect" style="display:none"></select>
 
-            <button id="send">{{__('forms.answer_btn')}} 
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" aria-hidden="true" class="lucide lucide-arrow-right w-5 h-5 group-hover:translate-x-1 transition-transform"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            <button id="send">{{ __('forms.answer_btn') }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    data-lucide="arrow-right" aria-hidden="true"
+                    class="lucide lucide-arrow-right w-5 h-5 group-hover:translate-x-1 transition-transform">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                </svg>
             </button>
         </div>
     </div>
@@ -72,13 +76,16 @@
 <script>
     const steps = @json($chatFields);
 
-    function getQuestion(step){
+    function getQuestion(step) {
+        if (step.name === 'firstname') {
+            return 'Digite seu nome completo.';
+        }
+
         return step.label;
     }
 </script>
 
 <script>
-
     let currentStep = 0;
     let formData = {};
 
@@ -104,26 +111,29 @@
     }*/
 
     function addMessage(
-            text,
-            type,
-            extraClass = '',
-            label = '',
-            editable = false,
-            stepIndex = null,
-            fieldKey = null
-        ){
+        text,
+        type,
+        extraClass = '',
+        label = '',
+        editable = false,
+        stepIndex = null,
+        fieldKey = null
+    ) {
 
-            const div = document.createElement('div');
-            const messageTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const div = document.createElement('div');
+        const messageTime = new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
 
-            div.className = `message ${type} ${extraClass}`;
+        div.className = `message ${type} ${extraClass}`;
 
-            if(type === 'user' && label){
+        if (type === 'user' && label) {
 
-                div.dataset.step = stepIndex;
-                div.dataset.field = fieldKey;
+            div.dataset.step = stepIndex;
+            div.dataset.field = fieldKey;
 
-                div.innerHTML = `
+            div.innerHTML = `
                     <div class="message-label">
                         ${label}
                     </div>
@@ -152,7 +162,7 @@
 
                                     </svg>
 
-                                    <span>{{__('forms.edit')}}</span>
+                                    <span>{{ __('forms.edit') }}</span>
 
                                 </div>
                             `
@@ -170,22 +180,22 @@
                     </div>
                 `;
 
-            }else{
+        } else {
 
-                div.innerHTML = `
+            div.innerHTML = `
                     <div>${text}</div>
                     <div class="message-meta message-meta-bot">
                         <span>${messageTime}</span>
                     </div>
                 `;
 
-            }
-
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
         }
 
-    function showTyping(){
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function showTyping() {
         const div = document.createElement('div');
 
         div.className = 'message bot';
@@ -203,28 +213,28 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    function hideTyping(){
+    function hideTyping() {
         const typing = document.getElementById('typing');
 
-        if(typing){
+        if (typing) {
             typing.remove();
         }
     }
 
-    function askQuestion(){
-        if(currentStep === steps.length){
+    function askQuestion() {
+        if (currentStep === steps.length) {
             renderTerms();
             return;
         }
 
-        if(currentStep > steps.length){
+        if (currentStep > steps.length) {
             finishForm();
             return;
         }
 
         const step = steps[currentStep];
 
-        
+
         resetInput();
         if (step.name === 'mobilephone') {
             initWhatsappInput();
@@ -239,32 +249,35 @@
         setTimeout(() => {
             hideTyping();
             addMessage(
-                step.label,
+                getQuestion(step),
                 'bot'
             );
 
             // SE FOR SELECT, RENDERIZA BOTÕES
-            if(step.fieldType === 'select'){
+            if (step.fieldType === 'select') {
+                setAnswerInputMode('select');
                 renderOptions(step);
+            } else {
+                setAnswerInputMode('text');
             }
 
-            if(step.name === 'website'){
+            if (step.name === 'website') {
                 renderNoWebsiteOption(step);
             }
 
             input.focus();
 
-        },500);
+        }, 500);
     }
 
-    function configureField(step){
+    function configureField(step) {
         const input = document.getElementById('answer');
         const select = document.getElementById('answerSelect');
 
         input.style.display = 'block';
         select.style.display = 'none';
 
-        if(step.fieldType === 'select'){
+        if (step.fieldType === 'select') {
             input.style.display = 'none';
             select.style.display = 'block';
 
@@ -283,17 +296,16 @@
         }
     }
 
-    function getCurrentValue(){
+    function getCurrentValue() {
         const step = steps[currentStep];
 
-        if(step.fieldType === 'select')
-        {
+        if (step.fieldType === 'select') {
             return document
                 .getElementById('answerSelect')
                 .value;
         }
 
-        if(step.name === 'mobilephone'){
+        if (step.name === 'mobilephone') {
             normalizeWhatsappValue();
         }
 
@@ -303,26 +315,26 @@
             .trim();
     }
 
-    function fillInputFromSavedLead(step){
-        if(step.fieldType === 'select'){
+    function fillInputFromSavedLead(step) {
+        if (step.fieldType === 'select') {
             return;
         }
 
         const savedValue = getSavedLeadValue(step);
 
-        if(!savedValue){
+        if (!savedValue) {
             return;
         }
 
         input.value = savedValue;
 
-        if(step.name === 'mobilephone' && whatsappInstance){
+        if (step.name === 'mobilephone' && whatsappInstance) {
             whatsappInstance.setNumber(savedValue);
             normalizeWhatsappValue();
         }
     }
 
-    function getSavedLeadValue(step){
+    function getSavedLeadValue(step) {
         const fieldKey = normalizeLeadFieldKey(step.name);
         const candidateKeys = [fieldKey];
 
@@ -332,14 +344,14 @@
             website: ['LeadWebsite', 'LeadUrl']
         };
 
-        if(fieldMap[step.name]){
+        if (fieldMap[step.name]) {
             candidateKeys.unshift(...fieldMap[step.name]);
         }
 
-        for(const key of candidateKeys){
+        for (const key of candidateKeys) {
             const value = localStorage.getItem(key) || getCookie(key);
 
-            if(value){
+            if (value) {
                 return value;
             }
         }
@@ -347,8 +359,8 @@
         return '';
     }
 
-    function normalizeLeadFieldKey(name){
-        return window.DigifyForms?.normalizeLeadField?.(name) || 'Lead' + name
+    function normalizeLeadFieldKey(name) {
+        return window.DigisacForms?.normalizeLeadField?.(name) || 'Lead' + name
             .replace(/^0-\d+\//, '')
             .replace(/[^a-zA-Z0-9_]/g, '_')
             .split('_')
@@ -357,8 +369,8 @@
     }
 
     function getCookie(name) {
-        if(window.DigifyForms?.getCookie){
-            return window.DigifyForms.getCookie(name);
+        if (window.DigisacForms?.getCookie) {
+            return window.DigisacForms.getCookie(name);
         }
 
         const cookies = document.cookie.split(';');
@@ -374,7 +386,7 @@
         return null;
     }
 
-    function renderOptions(step){
+    function renderOptions(step) {
         const wrapper = document.createElement('div');
 
         wrapper.className = 'options';
@@ -389,7 +401,7 @@
             btn.onclick = () => {
                 const fieldKey = `${step.objectTypeId}/${step.name}`;
 
-                if(step.name === segmentFieldName){
+                if (step.name === segmentFieldName) {
                     delete formData[otherSegmentFieldKey];
                 }
 
@@ -407,11 +419,11 @@
 
                 wrapper.remove();
 
-                if(step.name === segmentFieldName && option.value === 'Outro segmento'){
+                if (step.name === segmentFieldName && option.value === 'Outro segmento') {
                     pendingOtherSegmentStep = currentStep;
                     input.value = '';
                     input.focus();
-                    addMessage("{{__('forms.enter_segmento')}}", 'bot');
+                    addMessage("{{ __('forms.enter_segmento') }}", 'bot');
                     return;
                 }
 
@@ -428,7 +440,7 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    function renderNoWebsiteOption(step){
+    function renderNoWebsiteOption(step) {
         const wrapper = document.createElement('div');
 
         wrapper.className = 'options';
@@ -436,7 +448,7 @@
         const btn = document.createElement('button');
 
         btn.className = 'option-btn';
-        btn.textContent = "{{__('forms.no_website')}}";
+        btn.textContent = "{{ __('forms.no_website') }}";
 
         btn.onclick = () => {
             const fieldKey = `${step.objectTypeId}/${step.name}`;
@@ -445,7 +457,7 @@
             formData['nao_tem_site'] = '1';
 
             addMessage(
-                "{{__('forms.no_website')}}",
+                "{{ __('forms.no_website') }}",
                 'user',
                 '',
                 step.label,
@@ -465,11 +477,15 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    async function submitAnswer(){
-        if(pendingOtherSegmentStep !== null){
+    async function submitAnswer() {
+        if (steps[currentStep]?.fieldType === 'select') {
+            return;
+        }
+
+        if (pendingOtherSegmentStep !== null) {
             const value = input.value.trim();
 
-            if(!value){
+            if (!value) {
                 return;
             }
 
@@ -479,7 +495,7 @@
                 value,
                 'user',
                 '',
-                "{{__('forms.enter_segmento')}}",
+                "{{ __('forms.enter_segmento') }}",
                 true,
                 pendingOtherSegmentStep,
                 otherSegmentFieldKey
@@ -494,19 +510,19 @@
 
         const value = getCurrentValue();
 
-        if(!value){
+        if (!value) {
             return;
         }
 
         const step = steps[currentStep];
 
-        if(step.fieldType === 'select'){
+        if (step.fieldType === 'select') {
             return;
         }
 
-        const result = await validateStep(step.objectTypeId + '/' +step.name, value);
+        const result = await validateStep(step.objectTypeId + '/' + step.name, value);
 
-        if(!result.success){
+        if (!result.success) {
             input.classList.add('input-error');
             addMessage(
                 result.message,
@@ -516,7 +532,7 @@
 
             setTimeout(() => {
                 addMessage(
-                    step.label,
+                    getQuestion(step),
                     'bot'
                 );
             }, 700);
@@ -529,10 +545,10 @@
             addMessage('Campo inválido','bot');
             return;
         }*/
-        
+
         const fieldKey = `${step.objectTypeId}/${step.name}`;
 
-        if(step.name === 'website'){
+        if (step.name === 'website') {
             delete formData['nao_tem_site'];
         }
 
@@ -553,91 +569,94 @@
         askQuestion();
     }
 
-   messages.addEventListener('click', (e) => {
+    messages.addEventListener('click', (e) => {
 
-    const message = e.target.closest('.message.user');
+        const message = e.target.closest('.message.user');
 
-    if(!message){
-        return;
-    }
-
-    const value = message.querySelector('.message-value span').innerText;
-
-    currentStep = Number(message.dataset.step);
-
-    /*
-     * Remove mensagens posteriores
-     */
-
-    let remove = false;
-
-    [...messages.children].forEach(item => {
-
-        if(item === message){
-            remove = true;
+        if (!message) {
+            return;
         }
 
-        if(remove){
-            item.remove();
-        }
+        const value = message.querySelector('.message-value span').innerText;
 
-    });
+        currentStep = Number(message.dataset.step);
 
-    /*
-     * Remove campos posteriores do formData
-     */
+        /*
+         * Remove mensagens posteriores
+         */
 
-    Object.keys(formData).forEach(key => {
+        let remove = false;
 
-        const step = steps.findIndex(s => {
+        [...messages.children].forEach(item => {
 
-            return `${s.objectTypeId}/${s.name}` === key;
+            if (item === message) {
+                remove = true;
+            }
+
+            if (remove) {
+                item.remove();
+            }
 
         });
 
-        if(step >= currentStep){
+        /*
+         * Remove campos posteriores do formData
+         */
 
-            delete formData[key];
+        Object.keys(formData).forEach(key => {
 
+            const step = steps.findIndex(s => {
+
+                return `${s.objectTypeId}/${s.name}` === key;
+
+            });
+
+            if (step >= currentStep) {
+
+                delete formData[key];
+
+            }
+
+        });
+
+        const websiteStep = steps.findIndex(s => s.name === 'website');
+
+        if (websiteStep >= currentStep) {
+            delete formData['nao_tem_site'];
         }
+
+        const segmentStep = steps.findIndex(s => s.name === segmentFieldName);
+
+        if (segmentStep >= currentStep) {
+            delete formData[otherSegmentFieldKey];
+        }
+
+        prepareInputForStep(steps[currentStep], value);
+        input.focus();
 
     });
 
-    const websiteStep = steps.findIndex(s => s.name === 'website');
-
-    if(websiteStep >= currentStep){
-        delete formData['nao_tem_site'];
-    }
-
-    const segmentStep = steps.findIndex(s => s.name === segmentFieldName);
-
-    if(segmentStep >= currentStep){
-        delete formData[otherSegmentFieldKey];
-    }
-
-    prepareInputForStep(steps[currentStep], value);
-    input.focus();
-
-});
-
-    function prepareInputForStep(step, value = ''){
+    function prepareInputForStep(step, value = '') {
         resetInput();
         pendingOtherSegmentStep = null;
 
         document.querySelectorAll('#messages > .options').forEach(option => option.remove());
 
-        if(step.fieldType === 'select'){
+        if (step.fieldType === 'select') {
+            setAnswerInputMode('select');
             input.value = '';
             renderOptions(step);
             return;
         }
 
-        if(step.name === 'mobilephone'){
+        setAnswerInputMode('text');
+
+        if (step.name === 'mobilephone') {
             initWhatsappInput();
 
             input.value = value;
 
-            if(whatsappInstance && value.startsWith('+')){
+            if (whatsappInstance && value.startsWith('+')) {
                 whatsappInstance.setNumber(value);
             }
 
@@ -648,11 +667,11 @@
         input.value = value;
     }
 
-    async function finishForm(){
+    async function finishForm() {
         console.log('FINALIZANDO');
         appendTrackingData();
 
-        addBotMessage("{{__('forms.sending_your_data')}}");
+        addBotMessage("{{ __('forms.sending_your_data') }}");
 
         const formDataSubmit = new FormData();
 
@@ -675,12 +694,12 @@
 
         formDataSubmit.append(
             'pageUri',
-            '{{url()->current()}}'
+            '{{ url()->current() }}'
         );
 
         formDataSubmit.append(
             'pageName',
-            '{{SEOTools::getTitle()}}'
+            '{{ SEOTools::getTitle() }}'
         );
 
         Object.entries(formData).forEach(([key, value]) => {
@@ -689,16 +708,14 @@
 
         try {
             const response = await fetch(
-                "{{ route('form.custom.store') }}",
-                {
-                    method:'POST',
-                    credentials:'include',
-                    headers:{
-                        'Accept':'application/json',
-                        'X-CSRF-TOKEN':
-                            document.querySelector(
-                                'meta[name="csrf-token"]'
-                            ).content
+                "{{ route('form.custom.store') }}", {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector(
+                            'meta[name="csrf-token"]'
+                        ).content
                     },
                     body: formDataSubmit
                 }
@@ -706,30 +723,28 @@
 
             const data = await response.json();
 
-            if(data.success){
-                window.DigifyForms?.saveCookie?.(formDataSubmit);
+            if (data.success) {
+                window.DigisacForms?.saveCookie?.(formDataSubmit);
 
-                addBotMessage("{{__('forms.data_has_been_sen')}}");
+                addBotMessage("{{ __('forms.data_has_been_sen') }}");
 
                 clearChatForm();
 
-                if(data.redirectUri){
+                if (data.redirectUri) {
                     closeChatModal();
                     window.open(data.redirectUri, '_blank');
                 }
-            }
-            else{
-                addBotMessage(data.message || "{{__('forms.submission_could_not_be_completed')}}");
+            } else {
+                addBotMessage(data.message || "{{ __('forms.submission_could_not_be_completed') }}");
             }
 
-        }
-        catch(error){
+        } catch (error) {
             console.error(error);
-            addBotMessage("{{__('forms.failed_to_send')}}");
+            addBotMessage("{{ __('forms.failed_to_send') }}");
         }
     }
 
-    function clearChatForm(){
+    function clearChatForm() {
         formData = {};
         pendingOtherSegmentStep = null;
         input.value = '';
@@ -737,34 +752,54 @@
         document.querySelectorAll('#messages > .options').forEach(option => option.remove());
     }
 
-    function closeChatModal(){
+    function closeChatModal() {
         const modal = document.getElementById('whatsappCommercialModal');
 
-        if(modal){
+        if (modal) {
             modal.classList.remove('active');
         }
     }
 
-    button.addEventListener('click',submitAnswer);
+    button.addEventListener('click', submitAnswer);
 
-    input.addEventListener('keydown',function(e){
-        if(e.key === 'Enter'){
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
             submitAnswer();
         }
     });
 
-    askQuestion();
+    startChat();
 
-    function addBotMessage(text){
-        addMessage(text,'bot');
+    function startChat() {
+        showTyping();
+
+        setTimeout(() => {
+            hideTyping();
+            addBotMessage(
+                'Olá, vou iniciar seu atendimento. <br>Para começarmos, responda uma pergunta por vez.');
+
+            setTimeout(() => {
+                showTyping();
+
+                setTimeout(() => {
+                    hideTyping();
+                    askQuestion();
+                }, 850);
+            }, 900);
+        }, 1850);
     }
-    function renderTerms(){
+
+    function addBotMessage(text) {
+        addMessage(text, 'bot');
+    }
+
+    function renderTerms() {
         showTyping();
 
         setTimeout(() => {
             hideTyping();
 
-            addMessage('<?=$termos;?>', 'bot');
+            addMessage('<?= $termos ?>', 'bot');
 
             const wrapper = document.createElement('div');
 
@@ -774,13 +809,13 @@
             const btn = document.createElement('button');
 
             btn.className = 'option-btn';
-            btn.innerText = "{{__('forms.agree_continue')}}";
+            btn.innerText = "{{ __('forms.agree_continue') }}";
 
             btn.onclick = () => {
                 formData['termos'] = '1';
 
                 addMessage(
-                    "{{__('forms.agree_terms')}}",
+                    "{{ __('forms.agree_terms') }}",
                     'user'
                 );
                 wrapper.remove();
@@ -797,11 +832,11 @@
         }, 800);
     }
 
-    async function validateStep(field, value){
+    async function validateStep(field, value) {
         const response = await fetch('/validate-chat-step', {
             method: 'POST',
             headers: {
-                'Content-Type':'application/json',
+                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document
                     .querySelector('meta[name="csrf-token"]')
                     .content
@@ -817,67 +852,67 @@
         return await response.json();
     }
 
-    function appendTrackingData(){
-        formData['0-1/utm_source']   = localStorage.getItem('utm_source') || '';
-        formData['0-1/utm_medium']   = localStorage.getItem('utm_medium') || '';
+    function appendTrackingData() {
+        formData['0-1/utm_source'] = localStorage.getItem('utm_source') || '';
+        formData['0-1/utm_medium'] = localStorage.getItem('utm_medium') || '';
         formData['0-1/utm_campaign'] = localStorage.getItem('utm_campaign') || '';
-        formData['0-1/utm_content']  = localStorage.getItem('utm_content') || '';
-        formData['0-1/utm_term']     = localStorage.getItem('utm_term') || '';
-        formData['0-1/utm_id']       = localStorage.getItem('utm_id') || '';
-        formData['0-1/gclid']        = localStorage.getItem('gclid') || '';
+        formData['0-1/utm_content'] = localStorage.getItem('utm_content') || '';
+        formData['0-1/utm_term'] = localStorage.getItem('utm_term') || '';
+        formData['0-1/utm_id'] = localStorage.getItem('utm_id') || '';
+        formData['0-1/gclid'] = localStorage.getItem('gclid') || '';
     }
 
-    
 
-function initWhatsappInput() {
 
-    input.classList.add('whatsapp');
+    function initWhatsappInput() {
 
-    removeWhatsappHandlers();
+        input.classList.add('whatsapp');
 
-    if (whatsappInstance) {
-        whatsappInstance.destroy();
-    }
+        removeWhatsappHandlers();
 
-    whatsappInstance = window.intlTelInput(input, {
-        initialCountry: definirDDIPorPaisChat(),
-        autoPlaceholder: "aggressive",
-        separateDialCode: true,
-        preferredCountries: [
-            "br",
-            "pt",
-            "us",
-            "ar",
-            "es",
-            "co",
-            "mx",
-            "ve"
-        ],
-        customPlaceholder: function(selectedCountryPlaceholder) {
-            return selectedCountryPlaceholder;
-        },
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
-    });
+        if (whatsappInstance) {
+            whatsappInstance.destroy();
+        }
 
-    const iti = whatsappInstance;
-    
+        whatsappInstance = window.intlTelInput(input, {
+            initialCountry: definirDDIPorPaisChat(),
+            autoPlaceholder: "aggressive",
+            separateDialCode: true,
+            preferredCountries: [
+                "br",
+                "pt",
+                "us",
+                "ar",
+                "es",
+                "co",
+                "mx",
+                "ve"
+            ],
+            customPlaceholder: function(selectedCountryPlaceholder) {
+                return selectedCountryPlaceholder;
+            },
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
+        });
 
-    // Mapa de países do select -> código ISO do intl-tel-input
-    const mapaPaisesParaISO = {
-        "Argentina": "ar",
-        "Bolívia": "bo",
-        "Chile": "cl",
-        "Colômbia": "co",
-        "Costa Rica": "cr",
-        "Equador": "ec",
-        "Espanha": "es",
-        "Emirados Árabes Unidos": "ae",
-        "Estados Unidos da América": "us",
-        "Venezuela": "ve",
-        "Índia": "in"
-    };
+        const iti = whatsappInstance;
 
-   
+
+        // Mapa de países do select -> código ISO do intl-tel-input
+        const mapaPaisesParaISO = {
+            "Argentina": "ar",
+            "Bolívia": "bo",
+            "Chile": "cl",
+            "Colômbia": "co",
+            "Costa Rica": "cr",
+            "Equador": "ec",
+            "Espanha": "es",
+            "Emirados Árabes Unidos": "ae",
+            "Estados Unidos da América": "us",
+            "Venezuela": "ve",
+            "Índia": "in"
+        };
+
+
 
         const countryChangeHandler = function() {
             input.value = '';
@@ -885,15 +920,15 @@ function initWhatsappInput() {
 
         input.addEventListener("countrychange", countryChangeHandler);
 
-         /**
+        /**
          * Procura o select de país dentro do mesmo container do input.
          * Adicione a classe "pais-mkt-espanhol" ao seu <select>.
          */
         const selectPaises = document.querySelectorAll(".pais-mkt-espanhol");
         const selectHandlers = [];
 
-        selectPaises.forEach((selectPais) => {        
-            const selectChangeHandler = function () {
+        selectPaises.forEach((selectPais) => {
+            const selectChangeHandler = function() {
                 const paisSelecionado = this.value;
                 const codigoISO = mapaPaisesParaISO[paisSelecionado];
 
@@ -917,7 +952,7 @@ function initWhatsappInput() {
         });
 
 
-        function whatsappMask(e){
+        function whatsappMask(e) {
             let v = e.target.value;
 
             const country = iti.getSelectedCountryData().iso2;
@@ -949,10 +984,20 @@ function initWhatsappInput() {
 
         // Ao sair do campo (blur)
         const blurHandler = function() {
+            const country = iti.getSelectedCountryData().iso2;
+
+            const numeroCompleto = iti.getNumber();
+
             if (!normalizeWhatsappValue()) {
                 input.classList.add("is-invalid");
+                if (country == "br") {
+                    input.value = "";
+                }
             } else {
                 input.classList.remove("is-invalid");
+                if (country != "br") {
+                    input.value = numeroCompleto; // formato internacional
+                }
             }
         };
 
@@ -967,98 +1012,117 @@ function initWhatsappInput() {
 
 
 
-}
-
-function normalizeWhatsappValue() {
-    if (!whatsappInstance || !input.value.trim()) {
-        return true;
     }
 
-    const countryData = whatsappInstance.getSelectedCountryData();
-    const digits = input.value.replace(/\D/g, '');
-    const dialCode = countryData.dialCode || '';
-    const number = whatsappInstance.getNumber();
+    function normalizeWhatsappValue() {
+        if (!whatsappInstance || !input.value.trim()) {
+            return true;
+        }
 
-    if (countryData.iso2 === 'br') {
-        input.value = formatBrazilWhatsapp(digits);
+        const countryData = whatsappInstance.getSelectedCountryData();
+        const digits = input.value.replace(/\D/g, '');
+        const dialCode = countryData.dialCode || '';
+        const number = whatsappInstance.getNumber();
+
+        if (countryData.iso2 === 'br') {
+            input.value = formatBrazilWhatsapp(digits);
+            return whatsappInstance.isValidNumber();
+        }
+
+        input.value = number || `+${dialCode}${digits}`;
+
         return whatsappInstance.isValidNumber();
     }
 
-    input.value = number || `+${dialCode}${digits}`;
+    function formatBrazilWhatsapp(value) {
+        let v = value.replace(/^55/, '');
 
-    return whatsappInstance.isValidNumber();
-}
+        if (v.length > 11) v = v.slice(0, 11);
 
-function formatBrazilWhatsapp(value) {
-    let v = value.replace(/^55/, '');
+        if (v.length > 10) {
+            v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+        } else if (v.length > 6) {
+            v = v.replace(/^(\d{2})(\d{4,5})(\d{0,4})$/, "($1) $2-$3");
+        } else if (v.length > 2) {
+            v = v.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+        } else {
+            v = v.replace(/^(\d*)$/, "($1");
+        }
 
-    if (v.length > 11) v = v.slice(0, 11);
-
-    if (v.length > 10) {
-        v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-    } else if (v.length > 6) {
-        v = v.replace(/^(\d{2})(\d{4,5})(\d{0,4})$/, "($1) $2-$3");
-    } else if (v.length > 2) {
-        v = v.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
-    } else {
-        v = v.replace(/^(\d*)$/, "($1");
+        return `+55 ${v}`;
     }
 
-    return `+55 ${v}`;
-}
+    function removeWhatsappHandlers() {
+        if (!whatsappHandlers) {
+            return;
+        }
 
-function removeWhatsappHandlers() {
-    if (!whatsappHandlers) {
-        return;
+        input.removeEventListener("countrychange", whatsappHandlers.countryChange);
+        input.removeEventListener("input", whatsappHandlers.mask);
+        input.removeEventListener("blur", whatsappHandlers.blur);
+
+        whatsappHandlers.selects.forEach(({
+            select,
+            handler
+        }) => {
+            select.removeEventListener("change", handler);
+        });
+
+        whatsappHandlers = null;
     }
 
-    input.removeEventListener("countrychange", whatsappHandlers.countryChange);
-    input.removeEventListener("input", whatsappHandlers.mask);
-    input.removeEventListener("blur", whatsappHandlers.blur);
+    function resetInput() {
 
-    whatsappHandlers.selects.forEach(({ select, handler }) => {
-        select.removeEventListener("change", handler);
-    });
+        input.classList.remove('whatsapp');
+        input.classList.remove('is-invalid');
 
-    whatsappHandlers = null;
-}
+        removeWhatsappHandlers();
 
-function resetInput() {
+        if (whatsappInstance) {
+            whatsappInstance.destroy();
+            whatsappInstance = null;
+        }
 
-    input.classList.remove('whatsapp');
-    input.classList.remove('is-invalid');
+        const iti = input.closest('.iti');
 
-    removeWhatsappHandlers();
+        if (iti) {
 
-    if (whatsappInstance) {
-        whatsappInstance.destroy();
-        whatsappInstance = null;
+            // volta o input para o pai original
+            iti.parentNode.insertBefore(input, iti);
+
+            // remove o wrapper criado pelo plugin
+            iti.remove();
+        }
+
+        // Remove estilos adicionados pelo plugin
+        input.style.paddingLeft = '';
+        input.style.paddingRight = '';
+        input.style.width = '';
+        input.setAttribute('placeholder', defaultAnswerPlaceholder);
+        input.disabled = false;
+        button.disabled = false;
+
+        input.value = '';
+
     }
 
-    const iti = input.closest('.iti');
+    function setAnswerInputMode(mode) {
+        if (mode === 'select') {
+            input.value = '';
+            input.disabled = true;
+            button.disabled = true;
+            input.setAttribute('placeholder', 'Selecione uma opção');
+            return;
+        }
 
-    if (iti) {
-
-        // volta o input para o pai original
-        iti.parentNode.insertBefore(input, iti);
-
-        // remove o wrapper criado pelo plugin
-        iti.remove();
+        input.disabled = false;
+        button.disabled = false;
+        input.setAttribute('placeholder', defaultAnswerPlaceholder);
     }
 
-    // Remove estilos adicionados pelo plugin
-    input.style.paddingLeft = '';
-    input.style.paddingRight = '';
-    input.style.width = '';
-    input.setAttribute('placeholder', defaultAnswerPlaceholder);
 
-    input.value = '';
-
-}
-
-
-function definirDDIPorPaisChat() {
-        if(window.definirDDIPorPais){
+    function definirDDIPorPaisChat() {
+        if (window.definirDDIPorPais) {
             return window.definirDDIPorPais();
         }
 
@@ -1069,11 +1133,11 @@ function definirDDIPorPaisChat() {
 
         // Obtém a rota atual
         const rota = window.location.pathname.toLowerCase();
-            
+
         // Define o país com base na rota
         if (appLocale === "es" || rota.startsWith("/es")) {
             codigoPais = "co"; // Espanhol -> Colômbia (+57)
-        }else if(appLocale === "en" || rota.startsWith("/en")){
+        } else if (appLocale === "en" || rota.startsWith("/en")) {
             codigoPais = "us"; // Estados Unidos (+1)
         }
 
@@ -1088,11 +1152,11 @@ function definirDDIPorPaisChat() {
         ];
 
         // Se não estiver na lista, verifica a rota
-        if (!paisesSuportados.includes(codigoPais)) { 
+        if (!paisesSuportados.includes(codigoPais)) {
             // Define o país com base na rota
             if (appLocale === "es" || rota.startsWith("/es")) {
                 codigoPais = "co"; // Espanhol -> Colômbia (+57)
-            }else if(appLocale === "en" || rota.startsWith("/en")){
+            } else if (appLocale === "en" || rota.startsWith("/en")) {
                 codigoPais = "us"; // Estados Unidos (+1)
             }
         }

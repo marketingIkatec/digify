@@ -33,6 +33,8 @@ Route::middleware('registrar.visita')->group(function () {
 
     Route::post('/lead-contato', [LeadAppController::class, 'leadContatoStore'])->name('lead.leadContato.store');
     Route::post('/form-custom-store', [LeadAppController::class, 'formCustomStore'])->name('form.custom.store');
+    Route::post('/validate-chat-step', [LeadAppController::class, 'validateStep'])->name('validate.chat.step');
+
 });
 
 require __DIR__.'/auth.php';
