@@ -1,9 +1,5 @@
 @import "./root.css";
 
-:root {
-    --gradient-secondary: linear-gradient(135deg, #0c4dd0, #29dbff);
-}
-
 .whatsapp-floating {
     position: fixed;
     right: 20px;
@@ -135,7 +131,6 @@
     transition:
         opacity 0.24s ease,
         transform 0.24s ease;
-    z-index: 9999;
 }
 
 .whatsapp-chat-popup.active {
@@ -409,11 +404,20 @@ body:has(.whatsapp-chat-popup.active) .whatsapp-floating {
     color: #0f172a;
 }
 
+.btn-whatsapp-custom .message.bot a {
+    font-weight: 500;
+    color: #0077b6;
+}
+.btn-whatsapp-custom .message.bot a:hover {
+    text-decoration: underline;
+}
+
 .btn-whatsapp-custom .message.bot.error {
     border: 1px solid rgba(239, 68, 68, 0.22);
     border-left: 4px solid #ef4444;
     background: #fff7f7;
     color: #b91c1c;
+    text-align: left;
 }
 
 .btn-whatsapp-custom .message.user {
@@ -555,6 +559,7 @@ body:has(.whatsapp-chat-popup.active) .whatsapp-floating {
 
 .btn-whatsapp-custom .chat-footer input {
     flex: 1;
+    width: 100%;
     min-width: 0;
     height: 2.8rem;
     padding: 0 0.9rem;

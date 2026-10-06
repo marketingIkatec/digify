@@ -23,7 +23,7 @@ class CustomFormHubSpotRequest extends FormRequest
     public function rules(): array
     {
         return [
-            '0-1/firstname'   => 'sometimes|required|string|min:2|max:255',
+            '0-1/firstname'   => ['sometimes', 'required', 'string', 'min:5', 'max:80', 'regex:/^(?!.*\b(oi|ola|olá|quero|queria|gostaria|preciso|testar|plataforma|email|e-mail|telefone|whatsapp|falar|saber|duvida|dúvida)\b)(?!.*[@:\/\/\d])[\pL]+(?:[\s\'\-]+[\pL]+){1,4}$/iu'],
             '0-1/lastname'    => 'sometimes|required|string|min:2|max:255',
             //'0-1/email'       => 'sometimes|required|email|max:255',
             '0-1/email'          => ['sometimes', 'required', 'email', 'max:255', new CorporateEmail],
@@ -34,9 +34,12 @@ class CustomFormHubSpotRequest extends FormRequest
             'nao_tem_site'    => 'sometimes|nullable|boolean',
             'termos'          => 'nullable|accepted',
             '0-2/qual_segmento_representa_melhor_seu_negocio' => 'sometimes|required|string',
-            '0-1/e_cliente_digify_'    => 'sometimes|required|string',
+            '0-1/qual_e_o_seu_cargo_digisac' => 'sometimes|required|string',
+            '0-1/e_cliente_digisac_'    => 'sometimes|required|string',
             '0-1/principal_necessidade' => 'sometimes|required|string',
             '0-1/numemployees'     => 'sometimes|required|string',
+            '0-1/quantidade_de_funcionarios__site_weuny'     => 'sometimes|required|string',
+            '0-1/url'              => 'nullable|string|max:255',
         ];
     }
     public function messages(): array
@@ -48,6 +51,7 @@ class CustomFormHubSpotRequest extends FormRequest
             '0-1/firstname.string'      => __('forms.validation_name_string'),
             '0-1/firstname.min'         => __('forms.validation_name_min'),
             '0-1/firstname.max'         => __('forms.validation_name_max'),
+            '0-1/firstname.regex'       => 'Digite apenas seu <b>Nome</b> e <b>Sobrenome.</b><br><br>As dúvidas serão atendidas depois dessa etapa.',
             '0-1/lastname.required'     => __('forms.validation_lastname_required'),
             '0-1/lastname.string'       => __('forms.validation_lastname_string'),
             '0-1/lastname.min'          => __('forms.validation_lastname_min'),
@@ -55,12 +59,15 @@ class CustomFormHubSpotRequest extends FormRequest
             '0-1/mobilephone.required'  => __('forms.validation_whatsapp_required'),
             '0-2/website.required'      => __('forms.validation_url_invalid'),  
             'termos.accepted'           => __('forms.validation_terms_required'),
+            '0-1/qual_e_o_seu_cargo_digisac.required' => __('forms.select_option'),
             '0-2/qual_segmento_representa_melhor_seu_negocio.required' => __('forms.validation_segment_required'),
             '0-2/name.required'         => __('forms.validation_company_required'),
             '0-1/pais__mkt____espanhol.required'    => __('forms.validation_pais_required'),
-            '0-1/e_cliente_digify_.required' => __('forms.select_option'),
+            '0-1/e_cliente_digisac_.required' => __('forms.select_option'),
             '0-1/principal_necessidade.required' => __('forms.select_option'),
             '0-1/numemployees.required' => __('forms.validation_required'),
+            '0-1/quantidade_de_funcionarios__site_weuny.required' => __('forms.select_option'),
+            '0-1/url.required'          => __('forms.validation_url_invalid'), 
         ];
     }
 
@@ -70,6 +77,11 @@ class CustomFormHubSpotRequest extends FormRequest
             if($this->exists('0-2/website') && $this->input('nao_tem_site') == false && !$this->filled('0-2/website')) {
                 $validator->errors()->add('0-2/website', __('forms.validation_website_required'));
             }
+
+            if (($this->has('0-1/e_cliente_digisac_') && $this->input('0-1/e_cliente_digisac_') == 'Sim sou Cliente') && !str_contains($this->input('0-1/url'), 'digisac.')) {
+                $validator->errors()->add('0-1/url', __('forms.validation_digisac_url_invalid'));
+            }
+
             if ($this->has('termos') && !$this->boolean('termos')) {
                 $validator->errors()->add('termos', __('forms.validation_terms_required'));
             }

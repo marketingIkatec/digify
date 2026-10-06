@@ -78,7 +78,11 @@
 
     function getQuestion(step) {
         if (step.name === 'firstname') {
-            return 'Digite seu nome completo.';
+            return 'Para começar, digite apenas seu <b>nome</b> e <b>sobrenome</b>.';
+        }
+
+        if (currentStep === 1 && leadFullName) {
+            return `Olá <b>${escapeHtml(leadFullName)}</b>, <br>por favor nos informe seu ${step.label}`;
         }
 
         return step.label;
@@ -88,6 +92,7 @@
 <script>
     let currentStep = 0;
     let formData = {};
+    let leadFullName = '';
 
     const messages = document.getElementById('messages');
     const input = document.getElementById('answer');
@@ -236,6 +241,9 @@
 
 
         resetInput();
+
+        setStepPlaceholder(step);
+
         if (step.name === 'mobilephone') {
             initWhatsappInput();
         }
@@ -259,6 +267,7 @@
                 renderOptions(step);
             } else {
                 setAnswerInputMode('text');
+                setStepPlaceholder(step);
             }
 
             if (step.name === 'website') {
@@ -508,13 +517,17 @@
             return;
         }
 
-        const value = getCurrentValue();
+        let value = getCurrentValue();
 
         if (!value) {
             return;
         }
 
         const step = steps[currentStep];
+
+        if (step.name === 'firstname') {
+            value = normalizeFullName(value);
+        }
 
         if (step.fieldType === 'select') {
             return;
@@ -532,7 +545,7 @@
 
             setTimeout(() => {
                 addMessage(
-                    getQuestion(step),
+                    getRetryQuestion(step),
                     'bot'
                 );
             }, 700);
@@ -540,6 +553,10 @@
         }
 
         input.classList.remove('input-error');
+
+        if (step.name === 'firstname') {
+            leadFullName = value;
+        }
 
         /*if(!validateField(step, value)){
             addMessage('Campo inválido','bot');
@@ -556,7 +573,7 @@
             value,
             'user',
             '',
-            step.label,
+            getAnswerLabel(step),
             true,
             currentStep,
             fieldKey
@@ -580,6 +597,10 @@
         const value = message.querySelector('.message-value span').innerText;
 
         currentStep = Number(message.dataset.step);
+
+        if (steps[currentStep]?.name === 'firstname') {
+            leadFullName = '';
+        }
 
         /*
          * Remove mensagens posteriores
@@ -663,6 +684,8 @@
             normalizeWhatsappValue();
             return;
         }
+
+        setStepPlaceholder(step);
 
         input.value = value;
     }
@@ -791,6 +814,54 @@
 
     function addBotMessage(text) {
         addMessage(text, 'bot');
+    }
+
+    function normalizeFullName(value) {
+        return value.trim().replace(/\s+/g, ' ');
+    }
+
+    function getRetryQuestion(step) {
+        if (step.name === 'firstname') {
+            return 'Digite seu <b>Nome</b> e <b>Sobrenome</b>.<br><small>Exemplo: Lucas Gabriel Souza.</small>';
+        }
+
+        return getQuestion(step);
+    }
+
+    function getAnswerLabel(step) {
+        if (step.name === 'firstname') {
+            return 'alterar meu nome';
+        }
+
+        return step.label;
+    }
+
+    function setStepPlaceholder(step) {
+        if (step.name === 'firstname') {
+            input.setAttribute('placeholder', 'Digite seu Nome Completo');
+            return;
+        }
+
+        if (step.name === 'email') {
+            input.setAttribute('placeholder', 'Digite seu E-mail');
+            return;
+        }
+
+        if (step.name === 'name') {
+            input.setAttribute('placeholder', 'Digite o nome da sua Empresa');
+            return;
+        }
+
+        input.setAttribute('placeholder', defaultAnswerPlaceholder);
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     function renderTerms() {
