@@ -215,7 +215,7 @@
         }
 
         .scenario-card {
-            background: var(--color-white);
+            background: var(--color-bg-2);
             border-radius: var(--radius-xl);
             border: 1px solid var(--color-border);
             overflow: hidden;
@@ -247,6 +247,7 @@
         .sc-header {
             padding: 18px 18px 14px;
             border-bottom: 1px solid var(--color-border);
+            background: #fff;
         }
 
         .sc-top {
@@ -391,10 +392,11 @@
 
         .sc-body {
             padding: 14px 18px;
-            flex: 1;
+            min-height: 470px;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            background: #fff;
         }
 
         .digisac-row {
@@ -804,8 +806,10 @@
         @media print {
             @page {
                 size: A4;
-                margin: 14mm 12mm 16mm;
+                margin: 7mm 9mm 7mm;
             }
+
+            /*altura - bottom*/
 
             body {
                 background: #fff;
@@ -814,8 +818,12 @@
                 print-color-adjust: exact;
             }
 
+            .compare-table-scroll {
+                margin: 20mm 0 4mm;
+            }
+
             .calculator-page {
-                padding: 26mm 0 18mm;
+                padding: 30mm 0 4mm;
             }
 
             .site-header,
@@ -839,8 +847,6 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 24px;
-                margin-bottom: 0;
-                padding-bottom: 5mm;
                 border-bottom: 2px solid #0a50ff;
                 background: #fff;
                 z-index: 10;
@@ -961,6 +967,18 @@
             .sc-body,
             .sc-footer {
                 padding: 10px 12px;
+            }
+
+            .sc-body {
+                min-height: 300px;
+            }
+
+            .plan-detail {
+                gap: 0px;
+            }
+
+            .cfg-row {
+                margin-bottom: 0px;
             }
 
             .plan-details {
@@ -1308,13 +1326,13 @@
             return `
     <div class="plan-details">
       ${keys.map((key) => `
-                    ${(key === 'digisac_user_price' && Number(d[key] || 0) === 0) ? '' : `
+                                                                                                                                                                                                                                                                                                                                                                                                    ${(key === 'digisac_user_price' && Number(d[key] || 0) === 0) ? '' : `
         <div class="plan-detail">
           <span class="k">${key === 'billing_price' ? `Preço ${billingText(sc)}` : detailLabel(key)}</span>
           <span class="v">${planDetailDisplay(sc.plan, key, key === 'billing_price' ? scenarioPlanPrice(sc) : d[key])}</span>
         </div>
       `}
-                  `).join('')}
+                                                                                                                                                                                                                                                                                                                                                                                                  `).join('')}
     </div>
   `;
         }
@@ -1423,26 +1441,26 @@
   </div>
   <div class="sc-body">
       ${(!isConsult && digisacPrice > 0) ? `
-                  <div class="digisac-row" onclick="toggleDigisac(${sc.id})">
-                    <input type="checkbox" ${sc.digisac?'checked':''} onchange="toggleDigisac(${sc.id})" onclick="event.stopPropagation()" />
-                    <span class="dg-label">Cliente Digisac</span>
-                    <span class="dg-disc">−${fmt(digisacPrice)}/user</span>
-                  </div>` : ''}
+                                                                                                                                                                                                                                                                                                                                                                                                  <div class="digisac-row" onclick="toggleDigisac(${sc.id})">
+                                                                                                                                                                                                                                                                                                                                                                                                    <input type="checkbox" ${sc.digisac?'checked':''} onchange="toggleDigisac(${sc.id})" onclick="event.stopPropagation()" />
+                                                                                                                                                                                                                                                                                                                                                                                                    <span class="dg-label">Cliente Digisac</span>
+                                                                                                                                                                                                                                                                                                                                                                                                    <span class="dg-disc">−${fmt(digisacPrice)}/user</span>
+                                                                                                                                                                                                                                                                                                                                                                                                  </div>` : ''}
       <div>
       ${Number(PLANS[sc.plan].price || 0) > 0 ? `
-                  <div class="cfg-section-title">Usuários e adicionais</div>
-                  ${cfgRow(sc,'users','Usuários',ep,planMinUsers(sc.plan),planMaxUsers(sc.plan))}
-                  ${cfgRow(sc,'workspaces','Workspaces extras',ep,planInitialCount(sc.plan, 'workspaces'))}
-                  ${planPipelinesUnlimited(sc.plan) ? '' : cfgRow(sc,'pipelines','Pipelines extras',ep,planInitialCount(sc.plan, 'pipelines'))}
-                  ${cfgRow(sc,'dashboards','Dashboards extras',ep,planInitialCount(sc.plan, 'dashboards'))}
-                  ${cfgRow(sc,'automations','Automações extras',ep,planInitialCount(sc.plan, 'automations'))}
-                  ${cfgRow(sc,'storage','Armazenamento extra (GB)',ep,planInitialCount(sc.plan, 'storage'))}` : ''}
+                                                                                                                                                                                                                                                                                                                                                                                                  <div class="cfg-section-title">Usuários e adicionais</div>
+                                                                                                                                                                                                                                                                                                                                                                                                  ${cfgRow(sc,'users','Usuários',ep,planMinUsers(sc.plan),planMaxUsers(sc.plan))}
+                                                                                                                                                                                                                                                                                                                                                                                                  ${cfgRow(sc,'workspaces','Workspaces extras',ep,planInitialCount(sc.plan, 'workspaces'))}
+                                                                                                                                                                                                                                                                                                                                                                                                  ${planPipelinesUnlimited(sc.plan) ? '' : cfgRow(sc,'pipelines','Pipelines extras',ep,planInitialCount(sc.plan, 'pipelines'))}
+                                                                                                                                                                                                                                                                                                                                                                                                  ${cfgRow(sc,'dashboards','Dashboards extras',ep,planInitialCount(sc.plan, 'dashboards'))}
+                                                                                                                                                                                                                                                                                                                                                                                                  ${cfgRow(sc,'automations','Automações extras',ep,planInitialCount(sc.plan, 'automations'))}
+                                                                                                                                                                                                                                                                                                                                                                                                  ${cfgRow(sc,'storage','Armazenamento extra (GB)',ep,planInitialCount(sc.plan, 'storage'))}` : ''}
     </div>
     ${Number(PLANS[sc.plan].price || 0) > 0 ? `
-                <div>
-                  <div class="cfg-section-title">Módulos</div>
-                  <div class="mods-wrap">${modChips}</div>
-                </div>` : ''}
+                                                                                                                                                                                                                                                                                                                                                                                                <div>
+                                                                                                                                                                                                                                                                                                                                                                                                  <div class="cfg-section-title">Módulos</div>
+                                                                                                                                                                                                                                                                                                                                                                                                  <div class="mods-wrap">${modChips}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                </div>` : ''}
   </div>
   <div class="sc-footer">
     ${!isConsult ? `<div class="discount-row"><label for="discount-${sc.id}">Desconto no valor final</label><div class="discount-fields"><div class="discount-input-wrap"><span>R$</span><input class="discount-input" id="discount-${sc.id}" type="number" min="0" step="0.01" value="${Number(discount.toFixed(2))}" onchange="setDiscount(${sc.id},this.value)" /></div><div class="discount-input-wrap"><input class="discount-input" id="discount-percent-${sc.id}" type="number" min="0" max="100" step="0.01" value="${Number(discountPercent.toFixed(2))}" onchange="setDiscountPercent(${sc.id},this.value)" /><span>%</span></div></div></div>` : ''}

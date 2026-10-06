@@ -138,6 +138,7 @@
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0) scale(1);
+    z-index: 99999;
 }
 
 body:has(.whatsapp-chat-popup.active) {
@@ -418,6 +419,7 @@ body:has(.whatsapp-chat-popup.active) .whatsapp-floating {
     background: #fff7f7;
     color: #b91c1c;
     text-align: left;
+    display: inline-table;
 }
 
 .btn-whatsapp-custom .message.user {

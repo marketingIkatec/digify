@@ -16,7 +16,8 @@ class LeadCustomContato extends Model
         'extra_data',
         'form_type',
         'locale',
-        'visita_id'
+        'visita_id',
+        'estado'
     ];
 
     // Campos que **não** devem aparecer no JSON

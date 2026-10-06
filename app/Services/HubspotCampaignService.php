@@ -234,6 +234,7 @@ class HubspotCampaignService
         $response = Http::withToken($this->token)->get($baseUrl, $query);
        return $response->json();
     }   
+    /*
     public function listForm($formHubSpotId = ''){
         if($formHubSpotId){
             $formHubSpot = FormHubSpot::find($formHubSpotId);
@@ -410,6 +411,193 @@ class HubspotCampaignService
         }
         return ['saidaHtml' => '', 'saidaFields' => ''];
     }
+    */
+
+    public function listForm($formHubSpotId = ''){
+        if($formHubSpotId){
+            $formHubSpot = FormHubSpot::find($formHubSpotId);
+            if(!empty($formHubSpot)){
+                if(empty($formHubSpot->form_fields)){
+                    $limit = 1000;
+                        
+                    $baseUrl = 'https://api.hubapi.com/forms/v2/fields/'.$formHubSpot->form_id;
+                    
+                    $query['formTypes'] = "ALL";
+                    
+                    $response = Http::withToken($this->token)->get($baseUrl, $query);
+
+                    $fields = $response->json();
+
+                    $formHubSpot->form_fields = $fields;
+                    $formHubSpot->save();
+                }else{
+                    $fields = $formHubSpot->form_fields;
+                }            
+
+                $saidaFields = [];
+                $saidaHtml = '';
+                foreach ($fields as $field) {
+                
+                    $name  = $field['name'] ?? '';
+
+                    $value = request()->$name ?? '';
+
+                    if($name == 'url_inteligencia_comercial'){
+                        $value = route('hubspot.login');
+                    }
+
+                    $class = "";
+
+                    $saidaFields[] =  $name;
+                    $label = $field['label'] ?? '';
+                    $objectTypeId = $field['objectTypeId'] ?? '';
+                    $type  = $field['fieldType'] ?? 'text';
+                    $required = !empty($field['required']) ? 'required' : '';
+                    $required = ''; // removendo obrigatoriedade para teste
+
+                    $true = true;
+                    $Name = $objectTypeId.'/'.$name;
+                    $iD = $name.'-'.$formHubSpotId;
+
+                    if($name == 'website'){
+                        $saidaHtml .= "<div class='form-group'>";
+                        $saidaHtml .= "  <label for='{$iD}'>". __('forms.company_website') ."</label>";
+                        $saidaHtml .= "  <input type='text' aria-label='". __('forms.company_website') ."' id='{$iD}' name='{$Name}' class='url' placeholder='". __('forms.placeholder_website') ."'>";
+                        $saidaHtml .= "  <label class='checkbox-row'>";
+                        $saidaHtml .= "      <input type='checkbox' class='nao_tem_site' name='nao_tem_site' value='1'> ". __('forms.no_website');
+                        $saidaHtml .= "      <span class='website_error error-message'>". __('forms.validation_url') ."</span>";
+                        $saidaHtml .= "  </label>";
+                        $saidaHtml .= "</div>";
+                        $true = false;
+                    }if($name == 'url'){
+                        $saidaHtml .= "<div class='form-group' style='display:none;'>";
+                        $saidaHtml .= "  <label for='{$iD}'>". __('forms.digisac_url') ."</label>";
+                        $saidaHtml .= "  <input type='text' aria-label='". __('forms.digisac_url') ."' id='{$iD}' name='{$Name}' placeholder='". __('forms.placeholder_digisac_url') ."'>";
+                        $saidaHtml .= "</div>";
+                        $true = false;
+                    }
+                    
+                    else if($name == 'mobilephone'){
+                        $saidaHtml .= "  <div class='form-group'>";
+                        $saidaHtml .= "    <label for='{$iD}'>". __('forms.whatsapp') ."</label>";
+                        $saidaHtml .= "    <input type='tel' aria-label='". __('forms.whatsapp') ."' id='{$iD}' name='{$Name}' class='whatsaap' placeholder='". __('forms.placeholder_phone') ."'>";
+                        $saidaHtml .= "  </div>";
+                        $true = false;
+                    }else if($name == 'outros_segmento' || $name == 'lastname'){
+                        $true = false;
+                    }
+
+                    $placeholder = $label;
+
+                    switch($name){
+                        case 'firstname' : 
+                            $label       = __('forms.name'); 
+                            $placeholder = __('forms.placeholder_full_name'); 
+                            break;
+
+                        case 'email' : 
+                            $label = __('forms.email');
+                            if($formHubSpot->form_corporate_email){
+                                $label = __('forms.corporate_email');
+                                if(strpos($formHubSpot->form_name, 'whatsapp') !== false){
+                                   $label = __('forms.corporate_email_form_contato'); 
+                                }
+                            }
+                            $placeholder = ($formHubSpot->form_corporate_email ? __('forms.placeholder_corporate_email') :__('forms.placeholder_email')); 
+                            $class = "email";
+                            break;
+                        case 'pais__mkt____espanhol' : 
+                            $class="pais-mkt-espanhol"; 
+                        break;
+                    }
+
+                    if($true){
+
+                        if($name == 'origem___contato'){
+                            if($formHubSpot->form_name == 'digify-botão-whatsapp-site'){
+                                $value= 'Digify - Botão WhatsApp';
+                            }else if($formHubSpot->form_name == 'digify-contato-site'){
+                                $value= 'Digify - Forms site';
+                            }
+                        }
+                        
+                        if(!$field['hidden']){
+
+                            $saidaHtml .= "<div class='form-group'>";
+                            $saidaHtml .= "<label for='{$iD}'>{$label}</label>";
+
+                            switch ($type) {
+
+                                case 'textarea':
+                                    $saidaHtml .= "<textarea class='{$class}' aria-label='{$label}' name='{$Name}' id='{$iD}' {$required}></textarea>";
+                                break;
+
+                                case 'select':
+                                case 'radio':
+
+                                    $saidaHtml .= "<select class='{$class}' aria-label='{$label}' name='{$Name}' id='{$iD}' ". (($name == 'qual_segmento_representa_melhor_seu_negocio') ? 'class="segmentos"' : 'class="'.$class.'"') .">";
+                                    $saidaHtml .= "<option value='' selected>".__('forms.select_option')."</option>";    
+                                    if(!empty($field['options'])){
+                                        foreach ($field['options'] as $option) {
+                                            $saidaHtml .= "<option value='{$option['value']}'>{$option['label']}</option>";
+                                        }
+                                    }
+
+                                    $saidaHtml .= "</select>";
+
+                                break;
+
+                                case 'checkbox':
+
+                                    if(!empty($field['options'])){
+
+                                        foreach ($field['options'] as $option) {
+                                            $saidaHtml .= "<label>";
+                                            $saidaHtml .= "<input type='checkbox' class='{$class}' aria-label='{$label}' name='{$Name}[]' value='{$option['value']}'> ";
+                                            $saidaHtml .= $option['label'];
+                                            $saidaHtml .= "</label>";
+                                        }
+
+                                    } else {
+
+                                        $saidaHtml .= "<input type='checkbox' aria-label='{$label}' id='{$iD}' name='{$Name}' value='true'>";
+
+                                    }
+
+                                break;
+
+                                case 'number':
+                                    $saidaHtml .= "<input type='number' class='{$class}' aria-label='{$label}' name='{$Name}' id='{$iD}' {$required}>";
+                                break;
+
+                                case 'date':
+                                    $saidaHtml .= "<input type='date' class='{$class}' aria-label='{$label}' name='{$Name}' id='{$iD}' {$required}>";
+                                break;
+
+                                default:
+                                    $saidaHtml .= "<input type='text' class='{$class}' aria-label='{$name}' name='{$Name}' id='{$iD}' placeholder='{$placeholder}' {$required}>";
+                            }
+
+                            $saidaHtml .= "</div>";
+
+                            if($name == 'qual_segmento_representa_melhor_seu_negocio'){
+                                $saidaHtml .= " <div class='form-group' style='display:none;'>";  
+                                $saidaHtml .= "   <input type='text' id='{$iD}' aria-label='". __('forms.enter_segmento') ."' name='0-2/outros_segmento' id='0-2/outros_segmento' placeholder='". __('forms.enter_segmento') ."'>";
+                                $saidaHtml .= " </div>";
+                            }            
+
+                        }else{
+                            $saidaHtml .= "<input type='hidden' name='{$Name}' id='{$iD}' value='{$value}'>";
+                        }
+                    }                
+                }
+                return ['saidaHtml' => $saidaHtml, 'saidaFields' => implode(',', $saidaFields)];
+                
+                return $response->json();
+            }
+        }
+        return ['saidaHtml' => '', 'saidaFields' => ''];
+    }
 
     public function atualizaContatoTeste(){
       $contactId = '164963967912'; 
@@ -547,7 +735,11 @@ class HubspotCampaignService
             $nameParts = $this->splitName($lead->nome);
             $dadosLead['0-1/firstname'] = $nameParts['name'];
             $dadosLead['0-1/lastname']  = $nameParts['lastname'];
-        }   
+        }
+        
+        if(!empty($lead->estado)){            
+            $dadosLead['0-1/hs_state_code'] = $lead->estado;   
+        }
 
         if(!empty($lead->email)){
             $dadosLead['0-1/email'] = $lead->email;   

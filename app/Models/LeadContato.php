@@ -19,7 +19,8 @@ class LeadContato extends Model
         'form_type',
         'locale',
         'mensagem',
-        'visita_id'
+        'visita_id',
+        'estado'
     ];
 
     // Campos que **não** devem aparecer no JSON

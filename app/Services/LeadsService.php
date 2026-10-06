@@ -28,6 +28,7 @@ class LeadsService
 
         if(!empty($data['0-1/mobilephone'])){
             $data['whatsapp'] = $data['0-1/mobilephone'];
+            $data['estado'] = getEstadoPorTelefone($data['whatsapp']);  
         }
 
         if(!empty($data['0-1/website'])){
