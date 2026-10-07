@@ -2,22 +2,10 @@
     $apiHubspot = new \App\Services\HubspotCampaignService();
     $fields = $apiHubspot->listForm($formHubSpot->id ?? null);
 
-    $ignoredFields = [
-        'utm_campaign',
-        'utm_source',
-        'utm_medium',
-        'utm_content',
-        'utm_term',
-        'utm_id',
-        'gclid',
-        'fbclid',
-        'msclkid',
-        'outros_segmento',
-        'lastname',
-    ];
+    $ignoredFields = ['outros_segmento', 'lastname'];
 
     $chatFields = collect($formHubSpot['form_fields'])
-        ->reject(fn($field) => in_array($field['name'], $ignoredFields))
+        ->reject(fn($field) => in_array($field['name'], $ignoredFields) || $field['hidden'])
         ->map(function ($field) {
             $translationKey = 'forms.hubspot_fields.' . $field['name'];
             $translatedLabel = __($translationKey);
@@ -29,7 +17,6 @@
             return $field;
         })
         ->values();
-
     $termos = __('forms.communication_consent_notice');
     //Política de Privacidade
     $pagePolitica = getPageById(__('pages.politica_de_privacidade'));
@@ -48,7 +35,6 @@
         $termos .=
             '<a href="' . route('site.show', $pageTermos->slug) . '" target="_blank">' . $pageTermos->titulo . '</a>.';
     }
-
 @endphp
 
 @if (!empty($formHubSpot) && !empty($fields['saidaHtml']))
