@@ -28,6 +28,7 @@ class DigifyHubspotService
                 return '';
             }
             $account->last_event = $data['event_dispared'];
+            $account->last_event_date = date('Y-m-d H:i:s');
             $account->save();
         }
 
