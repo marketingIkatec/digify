@@ -547,6 +547,12 @@
                                 - Account {{ $lead->digify_account_id }}
                             @endif
                             <br>Criado em {{ $lead->created_at_br }}
+                            @if (!empty($lead->last_event))
+                                - Ultimo evento: {{ $eventLabels[$lead->last_event] ?? $lead->last_event }}
+                            @endif
+                            @if (!empty($lead->last_event_date))
+                                - Data ultimo evento: {{ $lead->last_event_date }}
+                            @endif
                             @if ($daysSinceLastLogin !== null)
                                 - Último login há {{ $daysSinceLastLogin }} {{ $daysSinceLastLogin === 1 ? 'dia' : 'dias' }}
                             @else
