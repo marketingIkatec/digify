@@ -77,7 +77,7 @@ class AccountDigifyHubspotController extends Controller
       {
         "event": "account-actions",            //evento        
         "digify_account_id": "1234567",
-        "digify_pipeline_edited": "",         // se vier vazio eu assumo um valor
+        "event_dispared": "permission_group_created",         // se vier vazio eu assumo um valor
       }
     */
     public function accountActionsStore(accountActionsRequest $request, DigifyHubspotService $digifyService): JsonResponse
@@ -86,9 +86,8 @@ class AccountDigifyHubspotController extends Controller
             $data = $request->all();  
 
             $response  = $digifyService->verifyDigifyAccount($data);
-            if($response['success']){        
+            if($response['success']){  
                 $response  = $digifyService->accountActions($response['account'], $data);
-
                 if($response['success']){
                     return $this->returnSuccessJson($data, $response['account']);
                 }        

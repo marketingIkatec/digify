@@ -48,8 +48,6 @@ class DigifyHubspotService
 
         if(empty($account->hubspot_account_id)){
             $account->hubspot_account_id = $this->hubspotService->findContactByEmail($account->email);
-            $account->hubspot_deal_id    = $this->hubspotService->findDealByAccount($account);
-            
             $account->save();
 
             $properties['digify_account_id']      = $account->digify_account_id;
@@ -64,6 +62,12 @@ class DigifyHubspotService
                     'message' => str_replace("|", "<br>", $e->getMessage()),
                 ];
             }
+        }
+
+        if(empty($account->hubspot_deal_id)){
+            $account->hubspot_deal_id    = $this->hubspotService->findDealByAccount($account) ?? '';
+            $account->save();
+            $this->hubspotService->updateDealByContact($account, $account->properties);
         }
 
         return [
@@ -110,6 +114,10 @@ class DigifyHubspotService
         $eventDefinitions = $this->getEventDefinitions();
 
         if (!isset($eventDefinitions[$event])) {
+            Log::info('DIGIFY_EVENT_RECEIVED', [
+                'message' => 'Evento não suportado.',
+                'payload' => $data,
+            ]);
             return [
                 'success' => false,
                 'message' => 'Evento não suportado.',

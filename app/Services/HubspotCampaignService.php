@@ -104,8 +104,9 @@ class HubspotCampaignService
                     $payload
                 );
             $results = $response->json();
-
-            if(empty($results['results'])){ // não tem deal associado
+            return !empty($response['results'][0]['to'][0]['id']) ? $response['results'][0]['to'][0]['id'] : '';
+            
+            /*if(empty($results['results'])){ // não tem deal associado
                 $pipeline = "913377080"; // digify
 
                 /*Novo Cadastro → 1388412971
@@ -115,6 +116,7 @@ class HubspotCampaignService
                   Reativação → 1389463346
                   Encerrado → 1389463348
                 */
+                  /*
 
                 $url = "https://api.hubapi.com/crm/v3/objects/deals";
 
@@ -142,20 +144,20 @@ class HubspotCampaignService
                 ]);
                 $results = $response->json();
                 return !empty($results['id']) ? $results['id'] : ''; 
-            }
+            } */
 
-            return $response['results'][0]['to'][0]['id'];
+            //return $response['results'][0]['to'][0]['id'];
         }
-        return null;
+        return '';
 
     }
 
     public function updateDealByContact(AccountDigifyHubspot $account, $properties = []){
         
+        $account->updateProperties($properties); // salva as informações no banco de dados.
+
         if($account->hubspot_deal_id){
             
-            $account->updateProperties($properties); // salva as informações no banco de dados.
-
             $response = Http::withToken($this->token)->patch(
                 "https://api.hubapi.com/crm/v3/objects/deals/{$account->hubspot_deal_id}",
                 [
