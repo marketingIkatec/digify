@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('hubspot_account_id')->nullable();
             $table->string('hubspot_deal_id')->nullable();
             $table->timestamp('first_login')->nullable();
-            $table->longText('properties')->nullable();            
+            $table->longText('properties')->nullable();
+            $table->string('last_event')->nullable();            
             $table->timestamps();
         });
     }

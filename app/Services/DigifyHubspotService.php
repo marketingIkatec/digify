@@ -21,6 +21,16 @@ class DigifyHubspotService
 
 
     public function registerLog($data){
+
+        if(!empty($data['event_dispared']) && !empty($data['digify_account_id'])){
+            $account = AccountDigifyHubspot::where(['digify_account_id' => $data['digify_account_id']])->first();  
+            if($account->last_event == $data['event_dispared']){
+                return '';
+            }
+            $account->last_event = $data['event_dispared'];
+            $account->save();
+        }
+
         Log::info('DIGIFY_EVENT_RECEIVED', [
             'payload'          => $data,
         ]);

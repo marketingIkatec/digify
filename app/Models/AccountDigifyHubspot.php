@@ -17,7 +17,8 @@ class AccountDigifyHubspot extends Model
         'digify_account_id',
         'hubspot_account_id',
         'hubspot_deal_id',
-        'first_login'
+        'first_login',
+        'last_event'
     ];
 
     protected $casts = [
