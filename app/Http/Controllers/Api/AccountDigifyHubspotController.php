@@ -132,6 +132,14 @@ class AccountDigifyHubspotController extends Controller
             $query->where('properties', 'like', '%"' . $request->property . '"%');
         }
 
+        if ($request->filled('dateFrom')) {
+            $query->whereDate('created_at', '>=', $request->dateFrom);
+        }
+
+        if ($request->filled('dateTo')) {
+            $query->whereDate('created_at', '<=', $request->dateTo);
+        }
+
         $dataEvents = [
             'digify_person_created',
             'digify_people_imported',

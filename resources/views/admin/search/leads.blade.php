@@ -1,7 +1,7 @@
 <div id="searchBox" class="hidden bg-white shadow rounded p-4 mb-4">
 
     <form method="GET">
-        <div class="row">
+        <div class="row align-items-end">
             @if (request()->route()->getName() != 'admin.lead.api-digify')
                 <div class="col-md-3">
                     <input type="text" name="nome" value="{{ request('nome') }}" placeholder="Buscar por nome"
@@ -71,10 +71,18 @@
                         </option>
                     </select>
                 </div>
+                <div class="col-md-2 mt-2">
+                    <label class="mb-1">De</label>
+                    <input type="date" name="dateFrom" value="{{ request('dateFrom') }}" class="form-control">
+                </div>
+                <div class="col-md-2 mt-2">
+                    <label class="mb-1">Ate</label>
+                    <input type="date" name="dateTo" value="{{ request('dateTo') }}" class="form-control">
+                </div>
             @endif
 
-            <div class="col-md-3">
-                <button class="btn btn-primary">Buscar</button>
+            <div class="col-md-2 mt-2">
+                <button class="btn btn-primary w-100">Buscar</button>
             </div>
         </div>
     </form>
