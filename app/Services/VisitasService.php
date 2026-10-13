@@ -74,7 +74,7 @@ class VisitasService
 			$where[] = "DATE_FORMAT(data, '%Y-%m-%d') = '".date('Y-m-d')."'";
 			$where[] = (($this->paginaId) ? " pagina_id = '".$this->paginaId."'" : " isnull(pagina_id)");
 
-			if($this->paginaId){
+			//if($this->paginaId){
 				$queryVisita = DB::select("SELECT id 
 												FROM visitas 
 												WHERE ".implode(" and ", $where));
@@ -119,7 +119,7 @@ class VisitasService
 						]);
 					}
 				}  
-			}  
+			//}  
 		}  
 	}
 

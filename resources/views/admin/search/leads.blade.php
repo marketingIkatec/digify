@@ -52,12 +52,23 @@
                 </div>
                 <div class="col-md-3">
                     <select name="digifyStatus" class="form-control">
-                        <option value="">Selecione o status</option>
+                        <option value="">Selecione a operacao</option>
                         @foreach(($statusOptions ?? []) as $statusValue => $statusLabel)
                             <option value="{{ $statusValue }}" {{ request('digifyStatus') === $statusValue ? 'selected' : '' }}>
                                 {{ $statusLabel }}
                             </option>
                         @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 mt-2 mt-md-0">
+                    <select name="usageFilter" class="form-control">
+                        <option value="">Selecione o uso</option>
+                        <option value="active_7d" {{ request('usageFilter') === 'active_7d' ? 'selected' : '' }}>
+                            Ativos nos ultimos 7 dias
+                        </option>
+                        <option value="without_properties" {{ request('usageFilter') === 'without_properties' ? 'selected' : '' }}>
+                            Ainda nao entraram
+                        </option>
                     </select>
                 </div>
             @endif

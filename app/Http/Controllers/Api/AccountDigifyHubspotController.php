@@ -191,6 +191,31 @@ class AccountDigifyHubspotController extends Controller
 
         $allLeads = (clone $query)->get();
 
+        if ($request->filled('usageFilter')) {
+            if ($request->usageFilter === 'active_7d') {
+                $allLeads = $allLeads->filter(fn ($lead) => $this->isActiveLastSevenDays($lead->properties ?? []))->values();
+            }
+
+            if ($request->usageFilter === 'without_properties') {
+                $allLeads = $allLeads->filter(fn ($lead) => empty($lead->properties))->values();
+            }
+        }
+
+        $statusCounts = collect($statusOptions)->mapWithKeys(function ($label, $status) use ($allLeads, $dataEvents, $executionEvents, $financialRiskEvents, $strongAdoptionEvents, $setupEvents) {
+            return [
+                $status => $allLeads->filter(function ($lead) use ($status, $dataEvents, $executionEvents, $financialRiskEvents, $strongAdoptionEvents, $setupEvents) {
+                    return $this->resolveDigifyStatusClass(
+                        $lead->properties ?? [],
+                        $dataEvents,
+                        $executionEvents,
+                        $financialRiskEvents,
+                        $strongAdoptionEvents,
+                        $setupEvents
+                    ) === $status;
+                })->count(),
+            ];
+        })->all();
+
         if ($request->filled('digifyStatus')) {
             $allLeads = $allLeads->filter(function ($lead) use ($request, $dataEvents, $executionEvents, $financialRiskEvents, $strongAdoptionEvents, $setupEvents) {
                 return $this->resolveDigifyStatusClass(
@@ -208,6 +233,10 @@ class AccountDigifyHubspotController extends Controller
 
         $dashboardStats = [
             'totalAccounts' => $statsLeads->count(),
+            'activeLastSevenDays' => $statsLeads->filter(function ($lead) {
+                return $this->isActiveLastSevenDays($lead->properties ?? []);
+            })->count(),
+            'withoutProperties' => $statsLeads->filter(fn ($lead) => empty($lead->properties))->count(),
             'withProperties' => $statsLeads->filter(fn ($lead) => !empty($lead->properties))->count(),
             'activatedAccounts' => $statsLeads->filter(function ($lead) use ($dataEvents, $executionEvents) {
                 $properties = $lead->properties ?? [];
@@ -218,6 +247,7 @@ class AccountDigifyHubspotController extends Controller
             'riskAccounts' => $statsLeads->filter(function ($lead) use ($financialRiskEvents) {
                 return count(array_intersect(array_keys($lead->properties ?? []), $financialRiskEvents)) > 0;
             })->count(),
+            'statusCounts' => $statusCounts,
         ];
 
         // Paginação com 10 por página
@@ -294,5 +324,24 @@ class AccountDigifyHubspotController extends Controller
         }
 
         return $hasAccountCreated ? 'empty' : 'empty';
+    }
+
+    private function isActiveLastSevenDays(array $properties): bool
+    {
+        $lastLoginValue = $properties['digify_login'] ?? $properties['digify_first_login'] ?? null;
+
+        if (empty($lastLoginValue) || !is_string($lastLoginValue)) {
+            return false;
+        }
+
+        foreach (['d/m/Y H:i:s', 'd/m/Y H:i'] as $format) {
+            try {
+                return \Carbon\Carbon::createFromFormat($format, $lastLoginValue)
+                    ->greaterThanOrEqualTo(now()->copy()->subDays(7));
+            } catch (\Exception $e) {
+            }
+        }
+
+        return false;
     }
 }

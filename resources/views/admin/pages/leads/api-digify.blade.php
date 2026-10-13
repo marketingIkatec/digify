@@ -104,9 +104,9 @@
 
         $dashboardStats = $dashboardStats ?? [];
         $totalAccounts = $dashboardStats['totalAccounts'] ?? $leads->total();
-        $withProperties = $dashboardStats['withProperties'] ?? 0;
-        $activatedAccounts = $dashboardStats['activatedAccounts'] ?? 0;
-        $riskAccounts = $dashboardStats['riskAccounts'] ?? 0;
+        $activeLastSevenDays = $dashboardStats['activeLastSevenDays'] ?? 0;
+        $withoutProperties = $dashboardStats['withoutProperties'] ?? 0;
+        $statusCounts = $dashboardStats['statusCounts'] ?? [];
     @endphp
 
     <style>
@@ -179,6 +179,29 @@
             font-size: 30px;
             line-height: 1;
             margin-top: 10px;
+        }
+
+        .digify-operation-stats {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 20px;
+        }
+
+        .digify-operation-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+            padding: 14px;
+        }
+
+        .digify-operation-card strong {
+            color: #0f172a;
+            display: block;
+            font-size: 24px;
+            line-height: 1;
+            margin-bottom: 10px;
         }
 
         .digify-account-card {
@@ -400,6 +423,7 @@
         @media (max-width: 992px) {
 
             .digify-stats,
+            .digify-operation-stats,
             .digify-card-body,
             .digify-flow {
                 grid-template-columns: 1fr;
@@ -429,17 +453,22 @@
                 <strong>{{ $totalAccounts }}</strong>
             </div>
             <div class="digify-stat">
-                <span>Com properties</span>
-                <strong>{{ $withProperties }}</strong>
+                <span>Ativos nos ultimos 7 dias</span>
+                <strong>{{ $activeLastSevenDays }}</strong>
             </div>
             <div class="digify-stat">
-                <span>Ativadas</span>
-                <strong>{{ $activatedAccounts }}</strong>
+                <span>Ainda nao entraram</span>
+                <strong>{{ $withoutProperties }}</strong>
             </div>
-            <div class="digify-stat">
-                <span>Risco financeiro</span>
-                <strong>{{ $riskAccounts }}</strong>
-            </div>
+        </div>
+
+        <div class="digify-operation-stats">
+            @foreach ($statusOptions ?? [] as $statusValue => $statusLabel)
+                <div class="digify-operation-card">
+                    <strong>{{ $statusCounts[$statusValue] ?? 0 }}</strong>
+                    <span class="digify-status {{ $statusValue }}">{{ $statusLabel }}</span>
+                </div>
+            @endforeach
         </div>
 
         @forelse($leads as $lead)
@@ -551,10 +580,11 @@
                                 - Ultimo evento: {{ $eventLabels[$lead->last_event] ?? $lead->last_event }}
                             @endif
                             @if (!empty($lead->last_event_date))
-                                - Data ultimo evento: {{ $lead->last_event_date }}
+                                <br>Data ultimo evento: {{ $lead->last_event_date->format('d/m/Y H:i') }}
                             @endif
                             @if ($daysSinceLastLogin !== null)
-                                - Último login há {{ $daysSinceLastLogin }} {{ $daysSinceLastLogin === 1 ? 'dia' : 'dias' }}
+                                - Último login há {{ $daysSinceLastLogin }}
+                                {{ $daysSinceLastLogin === 1 ? 'dia' : 'dias' }}
                             @else
                                 - Sem login registrado
                             @endif
