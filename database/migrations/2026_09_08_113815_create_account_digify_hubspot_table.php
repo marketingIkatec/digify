@@ -20,7 +20,8 @@ return new class extends Migration
             $table->timestamp('first_login')->nullable();
             $table->longText('properties')->nullable();
             $table->string('last_event')->nullable();
-            $table->timestamp('last_event_date')->nullable();            
+            $table->timestamp('last_event_date')->nullable();
+            $table->string('status_uso')->nullable();            
             $table->timestamps();
         });
     }

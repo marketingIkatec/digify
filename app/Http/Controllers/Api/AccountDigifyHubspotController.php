@@ -188,13 +188,13 @@ class AccountDigifyHubspotController extends Controller
         ];
 
         $statusOptions = [
-            'risk' => 'Risco financeiro',
-            'strong' => 'Adocao forte',
-            'active' => 'Ativado',
-            'operation' => 'Operacao inserida',
-            'setup' => 'Setup',
-            'explore' => 'Exploracao',
-            'empty' => 'Nao iniciado / Sem eventos',
+            'Risco financeiro' => 'Risco financeiro',
+            'Adocao forte' => 'Adocao forte',
+            'Ativado' => 'Ativado',
+            'Operacao inserida' => 'Operacao inserida',
+            'Setup' => 'Setup',
+            'Exploracao' => 'Exploracao',
+            'Nao iniciado / Sem eventos' => 'Nao iniciado / Sem eventos',
         ];
 
         $allLeads = (clone $query)->get();
@@ -209,32 +209,14 @@ class AccountDigifyHubspotController extends Controller
             }
         }
 
-        $statusCounts = collect($statusOptions)->mapWithKeys(function ($label, $status) use ($allLeads, $dataEvents, $executionEvents, $financialRiskEvents, $strongAdoptionEvents, $setupEvents) {
+        $statusCounts = collect($statusOptions)->mapWithKeys(function ($label, $status) use ($allLeads) {
             return [
-                $status => $allLeads->filter(function ($lead) use ($status, $dataEvents, $executionEvents, $financialRiskEvents, $strongAdoptionEvents, $setupEvents) {
-                    return $this->resolveDigifyStatusClass(
-                        $lead->properties ?? [],
-                        $dataEvents,
-                        $executionEvents,
-                        $financialRiskEvents,
-                        $strongAdoptionEvents,
-                        $setupEvents
-                    ) === $status;
-                })->count(),
+                $status => $allLeads->filter(fn ($lead) => ($lead->status_uso ?: 'Nao iniciado / Sem eventos') === $status)->count(),
             ];
         })->all();
 
         if ($request->filled('digifyStatus')) {
-            $allLeads = $allLeads->filter(function ($lead) use ($request, $dataEvents, $executionEvents, $financialRiskEvents, $strongAdoptionEvents, $setupEvents) {
-                return $this->resolveDigifyStatusClass(
-                    $lead->properties ?? [],
-                    $dataEvents,
-                    $executionEvents,
-                    $financialRiskEvents,
-                    $strongAdoptionEvents,
-                    $setupEvents
-                ) === $request->digifyStatus;
-            })->values();
+            $allLeads = $allLeads->filter(fn ($lead) => ($lead->status_uso ?: 'Nao iniciado / Sem eventos') === $request->digifyStatus)->values();
         }
 
         $statsLeads = $allLeads;

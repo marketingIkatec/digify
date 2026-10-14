@@ -27,8 +27,9 @@ class DigifyHubspotService
             if($account->last_event == $data['event_dispared']){
                 return '';
             }
-            $account->last_event = $data['event_dispared'];
+            $account->last_event      = $data['event_dispared'];
             $account->last_event_date = date('Y-m-d H:i:s');
+            $account->status_uso      = '';
             $account->save();
         }
 
@@ -94,7 +95,9 @@ class DigifyHubspotService
         if(empty($account->first_login)){
             $account->first_login = date('Y-m-d H:i:s');
             $account->save();
-            $properties['digify_first_login'] = $account->first_login->format('d/m/Y H:i:s'); 
+            $properties['digify_first_login'] = $account->first_login->format('d/m/Y H:i:s');
+            $properties['data_de_inicio_do_trial__digify'] = $account->first_login->format('d/m/Y H:i:s'); 
+            $properties['data_de_fim_do_trial__digify'] = $account->first_login->copy()->addDays(7)->format('d/m/Y H:i:s'); 
         }else{
             $properties['digify_login'] = date('d/m/Y H:i:s');
         }
@@ -160,6 +163,112 @@ class DigifyHubspotService
                 'event'   => $event,
             ];
         }
+    }
+
+    public function updateStatusUso(AccountDigifyHubspot $account, bool $sendToHubspot = true): string
+    {
+        $status = $this->calculateStatusUso($account);
+
+        $account->status_uso = $status;
+        $account->save();
+        
+        if ($sendToHubspot) {
+            $this->hubspotService->updateDealByContact($account, [
+                'status_de_uso_no_trial__digify'  => $status,
+                'data_de_inicio_do_trial__digify' => $account->first_login->format('d/m/Y H:i:s'),
+                'data_de_fim_do_trial__digify'    => $account->first_login->copy()->addDays(7)->format('d/m/Y H:i:s'),
+            ]);
+        }
+
+        return $status;
+    }
+
+    public function calculateStatusUso(AccountDigifyHubspot $account): string
+    {
+        $properties = $account->properties ?? [];
+        $propertyKeys = array_keys($properties);
+
+        $dataEvents = [
+            'digify_person_created',
+            'digify_people_imported',
+            'digify_organization_created',
+            'digify_organizations_imported',
+            'digify_lead_created',
+            'digify_lead_imported',
+            'digify_lead_captured',
+            'digify_import_completed',
+        ];
+
+        $executionEvents = [
+            'digify_deal_stage_changed',
+            'digify_task_created',
+            'digify_task_completed',
+            'digify_note_created',
+        ];
+
+        $financialRiskEvents = [
+            'digify_first_payment_failed',
+            'digify_recurring_payment_failed',
+            'digify_subscription_cancelled',
+        ];
+
+        $strongAdoptionEvents = [
+            'digify_deal_won',
+            'digify_deal_lost',
+            'digify_task_completed',
+            'digify_proposal_sent',
+            'digify_document_linked_to_deal',
+            'digify_module_used',
+            'digify_automation_executed',
+        ];
+
+        $setupEvents = [
+            'digify_pipeline_created',
+            'digify_pipeline_edited',
+            'digify_stage_created',
+            'digify_stage_edited',
+            'digify_stage_deleted',
+            'digify_dashboard_customized',
+            'digify_user_created',
+            'digify_permission_group_created',
+            'digify_module_added',
+            'digify_module_first_access',
+        ];
+
+        $hasFirstLogin = !empty($properties['digify_first_login']);
+        $hasSetup = count(array_intersect($propertyKeys, $setupEvents)) > 0;
+        $hasData = count(array_intersect($propertyKeys, $dataEvents)) > 0;
+        $hasDeal = !empty($properties['digify_deal_created']);
+        $hasExecution = count(array_intersect($propertyKeys, $executionEvents)) > 0;
+        $hasStrongAdoption = count(array_intersect($propertyKeys, $strongAdoptionEvents)) > 0;
+        $hasFinancialRisk = count(array_intersect($propertyKeys, $financialRiskEvents)) > 0;
+        $isActivated = $hasDeal && ($hasData || $hasExecution);
+
+        if ($hasFinancialRisk) {
+            return 'Risco financeiro';
+        }
+
+        if ($hasStrongAdoption) {
+            return 'Adocao forte';
+        }
+
+        if ($isActivated) {
+            return 'Ativado';
+        }
+
+        if ($hasDeal || $hasData) {
+            return 'Operacao inserida';
+        }
+
+        if ($hasSetup) {
+            return 'Setup';
+        }
+
+        if ($hasFirstLogin || !empty($properties['digify_login']) || !empty($properties['digify_dashboard_viewed'])) {
+            return 'Exploracao';
+        }
+
+        return 'Nao iniciado / Sem eventos';
     }
 
 

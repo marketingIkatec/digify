@@ -107,6 +107,15 @@
         $activeLastSevenDays = $dashboardStats['activeLastSevenDays'] ?? 0;
         $withoutProperties = $dashboardStats['withoutProperties'] ?? 0;
         $statusCounts = $dashboardStats['statusCounts'] ?? [];
+        $statusClasses = [
+            'Risco financeiro' => 'risk',
+            'Adocao forte' => 'strong',
+            'Ativado' => 'active',
+            'Operacao inserida' => 'operation',
+            'Setup' => 'setup',
+            'Exploracao' => 'explore',
+            'Nao iniciado / Sem eventos' => 'empty',
+        ];
     @endphp
 
     <style>
@@ -466,7 +475,7 @@
             @foreach ($statusOptions ?? [] as $statusValue => $statusLabel)
                 <div class="digify-operation-card">
                     <strong>{{ $statusCounts[$statusValue] ?? 0 }}</strong>
-                    <span class="digify-status {{ $statusValue }}">{{ $statusLabel }}</span>
+                    <span class="digify-status {{ $statusClasses[$statusValue] ?? 'empty' }}">{{ $statusLabel }}</span>
                 </div>
             @endforeach
         </div>
@@ -543,6 +552,11 @@
                 } else {
                     $statusClass = 'empty';
                     $statusLabel = $hasAccountCreated ? 'Nao iniciado' : 'Sem eventos';
+                }
+
+                if (!empty($lead->status_uso)) {
+                    $statusLabel = $lead->status_uso;
+                    $statusClass = $statusClasses[$statusLabel] ?? 'empty';
                 }
 
                 $flow = [
