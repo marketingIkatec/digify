@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 class RegistrarVisita
 {
-    private int $maxAttempts = 5;
+    private int $maxAttempts = 2;
     private int $windowMinutes = 5;
     private int $blockMinutes = 60;
     /**
@@ -52,11 +52,11 @@ class RegistrarVisita
         Cache::put(
             $attemptsKey,
             $attempts,
-            now()->addMinutes(5)
+            now()->addMinutes($windowMinutes)
         );
 
-        // Bloqueia após 5 caminhos distintos retornarem 404.
-        if (count($attempts) >= 5) {
+        // Bloqueia após maxAttempts caminhos distintos retornarem 404.
+        if (count($attempts) >= $maxAttempts) {
             Cache::put(
                 $blockedKey,
                 true,
