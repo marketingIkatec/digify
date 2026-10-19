@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('accountDigifyHubspot', function (Blueprint $table) {
             $table->id();
-            $table->string('email');
+            $table->string('email')->nullable();
+            $table->string('email_old')->nullable();
             $table->string('digify_account_id')->nullable();
             $table->string('hubspot_account_id')->nullable();
             $table->string('hubspot_deal_id')->nullable();

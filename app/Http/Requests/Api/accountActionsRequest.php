@@ -19,7 +19,8 @@ class accountActionsRequest extends FormRequest
         return [
             'event' => ['required', 'string', 'in:account-actions'],
             'email' => ['sometimes', 'email'],
-            'digify_account_id' => ['required', 'string', Rule::exists('accountDigifyHubspot', 'digify_account_id')],
+            //'digify_account_id' => ['required', 'string', Rule::exists('accountDigifyHubspot', 'digify_account_id')],
+            'digify_account_id' => ['required', 'string'],
         ];
     }
 

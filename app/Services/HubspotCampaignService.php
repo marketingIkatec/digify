@@ -87,7 +87,7 @@ class HubspotCampaignService
 
     public function findDealByAccount(AccountDigifyHubspot $account){
 
-        if(!empty($account)){
+        if(!empty($account) && $account->hubspot_account_id){
             $token = $this->token;
 
             $payload = [
@@ -157,6 +157,8 @@ class HubspotCampaignService
         $account->updateProperties($properties); // salva as informações no banco de dados.
 
         if($account->hubspot_deal_id){
+
+            unset($properties['digify_account_updated']);
             
             $response = Http::withToken($this->token)->patch(
                 "https://api.hubapi.com/crm/v3/objects/deals/{$account->hubspot_deal_id}",
@@ -601,21 +603,29 @@ class HubspotCampaignService
         return ['saidaHtml' => '', 'saidaFields' => ''];
     }
 
-    public function atualizaContatoTeste(){
-      $contactId = '164963967912'; 
-      
-      $update = Http::withToken($this->token)->patch(
-            "https://api.hubapi.com/crm/v3/objects/contacts/{$contactId}",
-            [
-                "properties" => [
-                    "usuario" => "jorge.donizete.nunes@gmail.com",
-                    "senha" => "ponto@app",
-                    "codigo_da_empresa" => "032027",                    
-                ]
-            ]
-        )->json();
+    public function atualizaContatoByHubspotAccountId(AccountDigifyHubspot $account, $properties = []){
+        if(!empty($account->hubspot_account_id)){
 
-        return $update;
+            $response = Http::withToken($this->token)->patch(
+                "https://api.hubapi.com/crm/v3/objects/contacts/{$account->hubspot_account_id}",
+                [
+                    'properties' => $properties,
+                ]
+            );
+
+            if ($response->failed()) {
+                //Tratamento de erros
+                $json = $response->json();
+
+                $error = trim(($json['message'] ?? '') . ' ' . ($json['erro'] ?? ''));
+                Log::info('Erro ao atualizar o contato na HubSpot', ['digify_account_id' => $account->digify_account_id, 'error-message' => $error, 'properties' => $properties]);
+                throw new Exception($error);
+            }
+            return $response->json();
+
+        }
+
+        return null;
     }
 
     public function enviarContatoTeste($firstname = null, $lastname = null, $email = null, $celular = null, $empresa = null, $cnpj = null, $colaboradores = null)

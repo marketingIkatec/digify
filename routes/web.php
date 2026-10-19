@@ -71,3 +71,15 @@ Route::get('/app-digify', function () {
     return $hubspotService->updateDealByContact($account, $properties);
     
 });
+
+Route::get('/app-digify-teste', function () {
+    $hubspotService = new \App\Services\HubspotCampaignService();
+    
+    $account = AccountDigifyHubspot::find(106);
+    //return $hubspotService->findContactByEmail($account->email);
+    //dd($account->toArray());
+    //$properties['digify_first_login'] = date('d/m/Y H:i:s');
+    $properties['email'] = 'jorge@testeupdate2.com.br';
+    return $hubspotService->atualizaContatoByHubspotAccountId($account, $properties);
+    
+});

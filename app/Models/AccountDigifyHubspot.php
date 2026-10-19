@@ -14,6 +14,7 @@ class AccountDigifyHubspot extends Model
     protected $fillable = [
         'id',
         'email',
+        'email_old',
         'digify_account_id',
         'hubspot_account_id',
         'hubspot_deal_id',

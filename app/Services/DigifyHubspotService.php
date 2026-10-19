@@ -42,44 +42,70 @@ class DigifyHubspotService
         
         $this->registerLog($data);
 
-        $account = '';
+        $account = [];
 
-        if(!empty($data['email'])){
+        if(!empty($data['digify_account_id'])){
+            
+            $account = AccountDigifyHubspot::firstOrCreate(
+                [
+                    'digify_account_id' => $data['digify_account_id'],
+                ],
+                [
+                    'digify_account_id' => $data['digify_account_id'],
+                ]
+            );     
+
+            if($data['email'] != '' && ($account->email == '' || $account->email != $data['email'])){
+                if($account->hubspot_account_id){
+                    $account->email_old = $account->email;
+                    $account->email = $data['email'];
+                    $account->save();
+
+                    $properties = [];
+                    $properties['email'] = $data['email'];
+
+                    $this->hubspotService->atualizaContatoByHubspotAccountId($account, $properties);   
+                }
+            }
+        }
+
+        if(empty($account) && $data['email']){
             $account = AccountDigifyHubspot::firstOrCreate(
                 [
                     'email' => $data['email'],
                 ],
                 [
+                    'email'             => $data['email'],
                     'digify_account_id' => $data['digify_account_id'],
                 ]
             );
-        }else if(!empty($data['digify_account_id'])){
-            $account = AccountDigifyHubspot::where(['digify_account_id' => $data['digify_account_id']])->first();        
         }
         
+        if(!empty($account->email)){
 
-        if(empty($account->hubspot_account_id)){
-            $account->hubspot_account_id = $this->hubspotService->findContactByEmail($account->email);
-            $account->save();
+            if(empty($account->hubspot_account_id) && $findContactByEmail = $this->hubspotService->findContactByEmail($account->email)){
+                $account->hubspot_account_id = $findContactByEmail;
+                $account->save();
 
-            $properties['digify_account_id']      = $account->digify_account_id;
-            $properties['digify_account_created'] = $account->created_at->format('d/m/Y H:i:s');
-            
-            try{                
-                $this->hubspotService->updateDealByContact($account, $properties);
+                $properties['digify_account_id']      = $account->digify_account_id;
+                $properties['digify_account_created'] = $account->created_at->format('d/m/Y H:i:s');
+                
+                try{                
+                    $this->hubspotService->updateDealByContact($account, $properties);
+                }
+                catch (\Exception $e) {
+                    return [
+                        'success' => false,
+                        'message' => str_replace("|", "<br>", $e->getMessage()),
+                    ];
+                }
             }
-            catch (\Exception $e) {
-                return [
-                    'success' => false,
-                    'message' => str_replace("|", "<br>", $e->getMessage()),
-                ];
-            }
-        }
 
-        if(empty($account->hubspot_deal_id)){
-            $account->hubspot_deal_id    = $this->hubspotService->findDealByAccount($account) ?? '';
-            $account->save();
-            $this->hubspotService->updateDealByContact($account, $account->properties);
+            if(empty($account->hubspot_deal_id)){
+                $account->hubspot_deal_id    = $this->hubspotService->findDealByAccount($account) ?? '';
+                $account->save();
+                $this->hubspotService->updateDealByContact($account, $account->properties);
+            }
         }
 
         return [
@@ -95,12 +121,14 @@ class DigifyHubspotService
         if(empty($account->first_login)){
             $account->first_login = date('Y-m-d H:i:s');
             $account->save();
-            $properties['digify_first_login'] = $account->first_login->format('d/m/Y H:i:s');
-            $properties['data_de_inicio_do_trial__digify'] = $account->first_login->format('d/m/Y H:i:s'); 
-            $properties['data_de_fim_do_trial__digify'] = $account->first_login->copy()->addDays(7)->format('d/m/Y H:i:s'); 
-        }else{
-            $properties['digify_login'] = date('d/m/Y H:i:s');
-        }
+            if($account->first_login){
+                $properties['digify_first_login']              = $account->first_login->format('d/m/Y H:i:s');
+                $properties['data_de_inicio_do_trial__digify'] = $account->first_login->format('Y-m-d'); 
+                $properties['data_de_fim_do_trial__digify']    = $account->first_login->copy()->addDays(7)->format('Y-m-d');  
+            }
+            }else{
+                $properties['digify_login'] = date('d/m/Y H:i:s');
+            }
 
         try{                
             $this->hubspotService->updateDealByContact($account, $properties);
@@ -173,11 +201,21 @@ class DigifyHubspotService
         $account->save();
         
         if ($sendToHubspot) {
-            $this->hubspotService->updateDealByContact($account, [
-                'status_de_uso_no_trial__digify'  => $status,
-                'data_de_inicio_do_trial__digify' => $account->first_login->format('d/m/Y H:i:s'),
-                'data_de_fim_do_trial__digify'    => $account->first_login->copy()->addDays(7)->format('d/m/Y H:i:s'),
-            ]);
+            if($account->first_login){
+                $this->hubspotService->updateDealByContact($account, [
+                    'status_de_uso_no_trial__digify'  => $status,
+                    'digify_first_login'              => $account->first_login->format('d/m/Y H:i:s'),
+                    'data_de_inicio_do_trial__digify' => $account->first_login->format('Y-m-d'),
+                    'data_de_fim_do_trial__digify'    => $account->first_login->copy()->addDays(7)->format('Y-m-d'),
+                ]);
+            }else{
+                $this->hubspotService->updateDealByContact($account, [
+                    'status_de_uso_no_trial__digify'  => $status,
+                ]);
+            }
+            $properties = $account->properties;
+            unset($properties['digify_account_updated']);
+            $this->hubspotService->updateDealByContact($account, $properties);
         }
 
         return $status;
@@ -257,7 +295,7 @@ class DigifyHubspotService
         }
 
         if ($hasDeal || $hasData) {
-            return 'Operacao inserida';
+            return 'Operação inserida';
         }
 
         if ($hasSetup) {
@@ -265,10 +303,10 @@ class DigifyHubspotService
         }
 
         if ($hasFirstLogin || !empty($properties['digify_login']) || !empty($properties['digify_dashboard_viewed'])) {
-            return 'Exploracao';
+            return 'Exploração';
         }
 
-        return 'Nao iniciado / Sem eventos';
+        return 'Não está testando';
     }
 
 

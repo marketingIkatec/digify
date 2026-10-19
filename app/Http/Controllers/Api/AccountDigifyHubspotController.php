@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Api\createAccountDigifyRequest;
 use App\Http\Requests\Api\accountActionsRequest;
 use App\Http\Requests\Api\accountLoggedInRequest;
+use Illuminate\Support\Facades\Log;
 
 class AccountDigifyHubspotController extends Controller
 {
@@ -41,6 +42,10 @@ class AccountDigifyHubspotController extends Controller
             }        
             return response()->json([$response], 422);    
         }
+        Log::info('DIGIFY_NOT_VALIDATED', [
+            'function' => 'createAccountDigifyStore',
+            'payload'  => $request->all(),
+        ]);
     }
 
     /*
@@ -69,6 +74,10 @@ class AccountDigifyHubspotController extends Controller
             return response()->json([$response], 422);
                      
         }
+        Log::info('DIGIFY_NOT_VALIDATED', [
+            'function' => 'accountLoggedInStore',
+            'payload'  => $request->all(),
+        ]);
     }
 
     /*
@@ -94,6 +103,10 @@ class AccountDigifyHubspotController extends Controller
             }        
             return response()->json([$response], 422);
         }
+        Log::info('DIGIFY_NOT_VALIDATED', [
+            'function' => 'accountActionsStore',
+            'payload'  => $request->all(),
+        ]);
     }
 
     private function returnSuccessJson(array $data, AccountDigifyHubspot $account): JsonResponse {
