@@ -154,33 +154,39 @@ class HubspotCampaignService
 
     public function updateDealByContact(AccountDigifyHubspot $account, $properties = []){
         
-        $account->updateProperties($properties); // salva as informações no banco de dados.
+        if(!empty($properties)){
+            $account->updateProperties($properties); // salva as informações no banco de dados.
 
-        if($account->hubspot_deal_id){
+            if($account->hubspot_deal_id){
 
-            unset($properties['digify_account_updated']);
-            
-            $response = Http::withToken($this->token)->patch(
-                "https://api.hubapi.com/crm/v3/objects/deals/{$account->hubspot_deal_id}",
-                [
-                    'properties' => $properties,
-                ]
-            );
+                unset($properties['digify_account_updated']);
+                
+                $response = Http::withToken($this->token)->patch(
+                    "https://api.hubapi.com/crm/v3/objects/deals/{$account->hubspot_deal_id}",
+                    [
+                        'properties' => $properties,
+                    ]
+                );
 
-            if ($response->failed()) {
-                //Tratamento de erros
-                $json = $response->json();
+                if ($response->failed()) {
+                    //Tratamento de erros
+                    $json = $response->json();
 
-                $error = trim(($json['message'] ?? '') . ' ' . ($json['erro'] ?? ''));
-                Log::info('Erro ao atualizar o contato na HubSpot', ['digify_account_id' => $account->digify_account_id, 'error-message' => $error, 'properties' => $properties]);
-                throw new Exception($error);
-            }
+                    $error = trim(($json['message'] ?? '') . ' ' . ($json['erro'] ?? ''));
+                    Log::info('Erro ao atualizar o contato na HubSpot', ['digify_account_id' => $account->digify_account_id, 'error-message' => $error, 'properties' => $properties]);
+                    throw new Exception($error);
+                }
 
-            return [
-                'success' => true,
-                'message' => 'Negocio atualizado com sucesso.',
-            ];
-        }       
+                return [
+                    'success' => true,
+                    'message' => 'Negocio atualizado com sucesso.',
+                ];
+            }       
+        }      
+        return [
+            'success' => true,
+            'message' => 'sem informação para atualizar',
+        ]; 
     }
 
     /*

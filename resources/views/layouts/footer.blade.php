@@ -17,8 +17,8 @@
             <ul class="site-footer__links">
                 @if (!empty($menuPagina))
                     @foreach ($menuPagina as $page)
-                        <a class="site-footer__link"
-                            href='{{ route('site.show', $page->slug) }}'>{{ $page->titulo }}</a>
+                        <li><a class="site-footer__link"
+                                href='{{ route('site.show', $page->slug) }}'>{{ $page->titulo }}</a></li>
                     @endforeach
                 @endif
                 <li><a class="site-footer__link" href="{{ route('home') }}#integracoes">Integrações</a></li>

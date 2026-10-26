@@ -24,13 +24,15 @@ class DigifyHubspotService
 
         if(!empty($data['event_dispared']) && !empty($data['digify_account_id'])){
             $account = AccountDigifyHubspot::where(['digify_account_id' => $data['digify_account_id']])->first();  
-            if($account->last_event == $data['event_dispared']){
-                return '';
-            }
-            $account->last_event      = $data['event_dispared'];
-            $account->last_event_date = date('Y-m-d H:i:s');
-            $account->status_uso      = '';
-            $account->save();
+            if($data['event_dispared'] && !empty($account)){
+                if($account->last_event == $data['event_dispared']){
+                    return '';
+                }
+                $account->last_event      = $data['event_dispared'];
+                $account->last_event_date = date('Y-m-d H:i:s');
+                $account->status_uso      = '';
+                $account->save();
+            }            
         }
 
         Log::info('DIGIFY_EVENT_RECEIVED', [
@@ -55,7 +57,7 @@ class DigifyHubspotService
                 ]
             );     
 
-            if($data['email'] != '' && ($account->email == '' || $account->email != $data['email'])){
+            if(!empty($data['email']) && ($account->email == '' || $account->email != $data['email'])){
                 if($account->hubspot_account_id){
                     $account->email_old = $account->email;
                     $account->email = $data['email'];
@@ -65,6 +67,13 @@ class DigifyHubspotService
                     $properties['email'] = $data['email'];
 
                     $this->hubspotService->atualizaContatoByHubspotAccountId($account, $properties);   
+                }else{
+                    $account->email = $data['email'];
+                    $account->hubspot_account_id = $this->hubspotService->findContactByEmail($account->email);
+
+                    $account->save();
+
+                    $this->hubspotService->updateDealByContact($account, $account->properties);
                 }
             }
         }

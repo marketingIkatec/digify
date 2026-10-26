@@ -75,11 +75,13 @@ Route::get('/app-digify', function () {
 Route::get('/app-digify-teste', function () {
     $hubspotService = new \App\Services\HubspotCampaignService();
     
-    $account = AccountDigifyHubspot::find(106);
-    //return $hubspotService->findContactByEmail($account->email);
+    //$account = AccountDigifyHubspot::find(106);
+    return $hubspotService->findContactByEmail('luciano.fernandes@ikatec.com.br');
     //dd($account->toArray());
     //$properties['digify_first_login'] = date('d/m/Y H:i:s');
     $properties['email'] = 'jorge@testeupdate2.com.br';
     return $hubspotService->atualizaContatoByHubspotAccountId($account, $properties);
     
 });
+Route::get('/auth/hubspot', [HubSpotAuthController::class, 'redirect'])->name('hubspot.login');
+Route::get('/auth/hubspot/callback', [HubSpotAuthController::class, 'callback'])->name('hubspot.callback');

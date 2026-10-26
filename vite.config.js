@@ -9,9 +9,12 @@ export default defineConfig({
             input: {
                 app: "resources/css/app.css",
                 main: "resources/css/main.css",
+                footer: "resources/css/footer.css",
                 app_admin: "resources/css/app.admin.css",
                 app_blog: "resources/css/app.blog.css",
                 app_colorbox: "resources/css/app.colorbox.css",
+                whatsapp_popup: "resources/css/whatsapp-popup.css",
+                form: "resources/css/form.css",
                 js_app: "resources/js/app.js",
                 js_blog: "resources/js/app.blog.js",
                 js_admin: "resources/js/app.admin.js",
@@ -29,8 +32,11 @@ export default defineConfig({
         laravel({
             input: [
                 "resources/css/app.css",
+                "resources/css/footer.css",
                 "resources/css/main.css",
                 "resources/js/app.js",
+                "resources/css/whatsapp-popup.css",
+                "resources/css/form.css",
                 "resources/css/app.admin.css",
                 "resources/css/app.blog.css",
                 "resources/js/app.admin.js",

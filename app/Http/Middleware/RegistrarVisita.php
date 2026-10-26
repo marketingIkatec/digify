@@ -9,10 +9,7 @@ use App\Services\VisitasService;
 use Illuminate\Support\Facades\Cache;
 
 class RegistrarVisita
-{
-    private int $maxAttempts = 2;
-    private int $windowMinutes = 5;
-    private int $blockMinutes = 60;
+{    
     /**
      * Handle an incoming request.
      *
@@ -20,6 +17,10 @@ class RegistrarVisita
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $maxAttempts   = 2;
+        $windowMinutes = 5;
+        $blockMinutes  = 60;
+        
         $ip = $request->ip();
 
         // Executa a requisição apenas uma vez.
@@ -55,12 +56,12 @@ class RegistrarVisita
             now()->addMinutes($windowMinutes)
         );
 
-        // Bloqueia após maxAttempts caminhos distintos retornarem 404.
+        // Bloqueia após $maxAttempts caminhos distintos retornarem 404.
         if (count($attempts) >= $maxAttempts) {
             Cache::put(
                 $blockedKey,
                 true,
-                now()->addMinutes(60)
+                now()->addMinutes($blockMinutes)
             );
 
             return response('Acesso temporariamente bloqueado.', 403);

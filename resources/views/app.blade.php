@@ -57,19 +57,51 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"></script>
     <!-- mascara do celular -->
-
-    <link rel="stylesheet" href="/build/assets/main.css?cache=<?= date('his') ?>">
-    <!--<link rel="stylesheet" href="/build/assets/app_namidia.css?cache=<?= date('his') ?>">-->
-    <link rel="stylesheet" href="/build/assets/app_blog.css?cache=<?= date('his') ?>">
+    @if ($item->css_app)
+        <link rel="stylesheet" href="/build/assets/main.css?cache=<?= date('his') ?>">
+        <link rel="stylesheet" href="/build/assets/app_blog.css?cache=<?= date('his') ?>">
+    @else
+        <link rel="stylesheet" href="/build/assets/form.css?cache=<?= date('his') ?>">
+        <link rel="stylesheet" href="/build/assets/whatsapp_popup.css?cache=<?= date('his') ?>">
+        <link rel="stylesheet" href="/build/assets/footer.css?cache=<?= date('his') ?>">
+    @endif
     <script src="/build/assets/js_app.js?cache=<?= date('his') ?>"></script>
 
     @if (env('APP_ENV') != 'local')
+        <!-- Google Tag Manager --
+        <script>
+            (function(w, d, s, l, i) {
+                w[l] = w[l] || [];
+                w[l].push({
+                    'gtm.start': new Date().getTime(),
+                    event: 'gtm.js'
+                });
+                var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s),
+                    dl = l != 'dataLayer' ? '&l=' + l : '';
+                j.async = true;
+                j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-P5J23R5J');
+        </script>
+        <!-- End Google Tag Manager -->
         <!-- Google Tag Manager -->
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-P5J23R5J');
+        <script>
+            (function(w, d, s, l, i) {
+                w[l] = w[l] || [];
+                w[l].push({
+                    'gtm.start': new Date().getTime(),
+                    event: 'gtm.js'
+                });
+                var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s),
+                    dl = l != 'dataLayer' ? '&l=' + l : '';
+                j.async = true;
+                j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-TV4WNCMD');
         </script>
         <!-- End Google Tag Manager -->
     @endif
@@ -80,17 +112,23 @@
 
     <!-- BODY Google Tag Manager (noscript) -->
     @if (env('APP_ENV') != 'local')
-        <!-- Google Tag Manager (noscript) -->
+        <!-- Google Tag Manager (noscript) --
         <noscript>
             <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P5J23R5J" height="0" width="0" style="display:none;visibility:hidden"></iframe>
         </noscript>
         <!-- End Google Tag Manager (noscript) -->
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TV4WNCMD" height="0" width="0"
+                style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
     @endif
     <!-- End BODY Google Tag Manager (noscript) -->
 
-    <!-- Menu -->
-    @include('layouts.header')
-    <!-- Menu -->
+    @if ($item->header_footer)
+        <!-- Menu -->
+        @include('layouts.header')
+        <!-- Menu -->
+    @endif
     <main class="internal-page">
         @yield('content')
     </main>
