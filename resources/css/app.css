@@ -921,37 +921,7 @@ p {
         padding: 28px;
     }
 }
-.form-success {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 48px 0 32px;
-    text-align: center;
-}
-.form-success .s-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: #18c7a81a;
-    color: var(--mint);
-    box-shadow: 0 0 40px #18c7a82e;
-}
-.form-success .s-icon svg {
-    width: 30px;
-    height: 30px;
-}
-.form-success strong {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--ink);
-}
-.form-success span {
-    font-size: 14px;
-    color: var(--muted);
-}
+
 .wrap {
     width: min(1160px, 100% - 48px);
     margin-inline: auto;
