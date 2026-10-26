@@ -14,10 +14,11 @@
             {!! renderBlock($block, 'conteudo') !!}
 
             <div class="form-card reveal-right">
-                @include('forms.form-custom-hubspot', ['formHubSpot' => $formHubSpot])
+                <div id="step-content">
+                    @include('forms.form-custom-hubspot', ['formHubSpot' => $formHubSpot])
+                </div>
 
-
-                <div id="form-success" class="form-success hidden" role="status" aria-live="polite">
+                <div id="step-success" class="form-success hidden" role="status" aria-live="polite">
                     <div class="s-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

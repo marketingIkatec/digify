@@ -1727,7 +1727,12 @@
             @endphp
             @if (!empty($formHubSpot))
                 <div id="step-content" class="lead-form">
-                    @include('forms.form-custom-hubspot', ['formHubSpot' => $formHubSpot])
+                    @php
+                        $html = view('forms.form-custom-hubspot', [
+                            'formHubSpot' => $formHubSpot,
+                        ])->render();
+                    @endphp
+                    @php echo str_replace('E-mail', 'E-mail corporativo', $html) @endphp
                 </div>
             @endif
 
