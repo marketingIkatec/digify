@@ -903,6 +903,7 @@
                 value,
                 locale: '{{ app()->getLocale() }}',
                 form_type: '{{ $formHubSpot->form_name }}',
+                form_custom_chat: true,
             })
         });
 

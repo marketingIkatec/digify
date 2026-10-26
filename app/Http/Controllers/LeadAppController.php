@@ -776,8 +776,15 @@ public function validateStep(Request $request)
         app()->setLocale($request->input('locale'));
     }
 
-    $rules = (new CustomFormHubSpotRequest())->rules();
-    $messages = (new CustomFormHubSpotRequest())->messages();
+    $formRequest = new CustomFormHubSpotRequest();
+
+    // Transfere os dados da requisição atual para a instância de validação.
+    $formRequest->merge([
+        'form_custom_chat' => $request->input('form_custom_chat'),
+    ]);
+
+    $rules = $formRequest->rules();
+    $messages = $formRequest->messages();
 
     $field = $request->field;
     $value = $request->value;

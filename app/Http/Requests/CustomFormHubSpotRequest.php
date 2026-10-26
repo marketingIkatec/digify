@@ -22,8 +22,21 @@ class CustomFormHubSpotRequest extends FormRequest
      */
     public function rules(): array
     {
+        $firstnameRules = [
+            'sometimes',
+            'required',
+            'string',
+            'min:5',
+            'max:80',
+        ];
+
+        // Aplica o regex somente se form_custom_chat existir e for true
+        if ($this->input('form_custom_chat') == true) {
+            $firstnameRules[] = 'regex:/^(?!.*\b(oi|ola|olá|quero|queria|gostaria|preciso|testar|plataforma|email|e-mail|telefone|whatsapp|falar|saber|duvida|dúvida)\b)(?!.*[@:\/\/\d])[\pL]+(?:[\s\'\-]+[\pL]+){1,4}$/iu';
+        }
+
         return [
-            '0-1/firstname'   => ['sometimes', 'required', 'string', 'min:5', 'max:80', 'regex:/^(?!.*\b(oi|ola|olá|quero|queria|gostaria|preciso|testar|plataforma|email|e-mail|telefone|whatsapp|falar|saber|duvida|dúvida)\b)(?!.*[@:\/\/\d])[\pL]+(?:[\s\'\-]+[\pL]+){1,4}$/iu'],
+            '0-1/firstname'   => $firstnameRules,
             '0-1/lastname'    => 'sometimes|required|string|min:2|max:255',
             //'0-1/email'       => 'sometimes|required|email|max:255',
             '0-1/email'          => ['sometimes', 'required', 'email', 'max:255', new CorporateEmail],
