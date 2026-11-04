@@ -517,6 +517,31 @@ document.addEventListener("DOMContentLoaded", () => {
         restartAuto();
     }
 
+    //preenche automaticamente qual é o dispositivo que vai preencher o formulário
+    const formDeviceType = document.querySelectorAll(".device_type");
+
+    if (formDeviceType.length) {
+        const userAgent = navigator.userAgent;
+        let device;
+
+        if (
+            /iPad|Tablet|PlayBook|Silk/i.test(userAgent) ||
+            (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent))
+        ) {
+            device = "tablet";
+        } else if (
+            /Mobi|Android|iPhone|iPod|IEMobile|Opera Mini/i.test(userAgent)
+        ) {
+            device = "celular";
+        } else {
+            device = "computador";
+        }
+
+        formDeviceType.forEach(function (input) {
+            input.value = device;
+        });
+    }
+
     // ======= LÓGICA DO BLOCO WEBSITE ========
 
     function isValidURL(url) {

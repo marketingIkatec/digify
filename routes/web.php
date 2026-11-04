@@ -32,9 +32,6 @@ Route::middleware('registrar.visita')->group(function () {
     Route::get('/blog/{slug_blog}', [BlogController::class, 'blogSiteShow'])->name('blog.site.show');
 
     Route::post('/lead-contato', [LeadAppController::class, 'leadContatoStore'])->name('lead.leadContato.store');
-    Route::post('/form-custom-store', [LeadAppController::class, 'formCustomStore'])->name('form.custom.store');
-    Route::post('/validate-chat-step', [LeadAppController::class, 'validateStep'])->name('validate.chat.step');
-
 });
 
 require __DIR__.'/auth.php';
@@ -51,6 +48,9 @@ Route::get('/send-contato', function () {
     $lead = LeadContato::find(3);
     return $hubSpot->enviarLeadForm($lead);
 });
+
+Route::post('/form-custom-store', [LeadAppController::class, 'formCustomStore'])->name('form.custom.store');
+Route::post('/validate-chat-step', [LeadAppController::class, 'validateStep'])->name('validate.chat.step');
 
 Route::get('/whatsapp/enviar', function (\Illuminate\Http\Request $request) {
     $telefone = $request->get('telefone');

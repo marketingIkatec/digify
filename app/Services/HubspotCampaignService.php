@@ -453,10 +453,14 @@ class HubspotCampaignService
                     $value = request()->$name ?? '';
 
                     if($name == 'url_inteligencia_comercial'){
-                        $value = route('hubspot.login');
+                        $value = 'https://digisac.com.br/auth/hubspot';
                     }
 
                     $class = "";
+
+                    if($name == 'device_type'){
+                        $class = "device_type";
+                    } 
 
                     $saidaFields[] =  $name;
                     $label = $field['label'] ?? '';
@@ -518,6 +522,9 @@ class HubspotCampaignService
                             break;
                         case 'pais__mkt____espanhol' : 
                             $class="pais-mkt-espanhol"; 
+                        break;
+                        case 'device_type' : 
+                            $class="device_type";  
                         break;
                     }
 
@@ -597,7 +604,7 @@ class HubspotCampaignService
                             }            
 
                         }else{
-                            $saidaHtml .= "<input type='hidden' name='{$Name}' id='{$iD}' value='{$value}'>";
+                            $saidaHtml .= "<input type='hidden' name='{$Name}' id='{$iD}' value='{$value}' class='{$class}'>";
                         }
                     }                
                 }
