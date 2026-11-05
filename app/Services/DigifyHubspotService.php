@@ -133,7 +133,7 @@ class DigifyHubspotService
             if($account->first_login){
                 $properties['digify_first_login']              = $account->first_login->format('d/m/Y H:i:s');
                 $properties['data_de_inicio_do_trial__digify'] = $account->first_login->format('Y-m-d'); 
-                $properties['data_de_fim_do_trial__digify']    = $account->first_login->copy()->addDays(7)->format('Y-m-d');  
+                $properties['data_de_fim_do_trial__digify']    = $account->first_login->copy()->addDays(30)->format('Y-m-d');  
             }
             }else{
                 $properties['digify_login'] = date('d/m/Y H:i:s');
@@ -215,7 +215,7 @@ class DigifyHubspotService
                     'status_de_uso_no_trial__digify'  => $status,
                     'digify_first_login'              => $account->first_login->format('d/m/Y H:i:s'),
                     'data_de_inicio_do_trial__digify' => $account->first_login->format('Y-m-d'),
-                    'data_de_fim_do_trial__digify'    => $account->first_login->copy()->addDays(7)->format('Y-m-d'),
+                    'data_de_fim_do_trial__digify'    => $account->first_login->copy()->addDays(30)->format('Y-m-d'),
                 ]);
             }else{
                 $this->hubspotService->updateDealByContact($account, [

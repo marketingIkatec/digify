@@ -83,5 +83,8 @@ Route::get('/app-digify-teste', function () {
     return $hubspotService->atualizaContatoByHubspotAccountId($account, $properties);
     
 });
+
+//Route::get('/update-api', [IndexController::class, 'atualizaApi'])->name('update-api');
+
 Route::get('/auth/hubspot', [HubSpotAuthController::class, 'redirect'])->name('hubspot.login');
 Route::get('/auth/hubspot/callback', [HubSpotAuthController::class, 'callback'])->name('hubspot.callback');
