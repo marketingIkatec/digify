@@ -676,6 +676,25 @@
         input.value = value;
     }
 
+    function getDeviceType() {
+        const userAgent = navigator.userAgent;
+        let device;
+
+        if (
+            /iPad|Tablet|PlayBook|Silk/i.test(userAgent) ||
+            (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent))
+        ) {
+            device = "tablet";
+        } else if (
+            /Mobi|Android|iPhone|iPod|IEMobile|Opera Mini/i.test(userAgent)
+        ) {
+            device = "celular";
+        } else {
+            device = "computador";
+        }
+        return device;
+    }
+
     async function finishForm() {
         console.log('FINALIZANDO');
         appendTrackingData();
@@ -709,6 +728,16 @@
         formDataSubmit.append(
             'pageName',
             '{{ SEOTools::getTitle() }}'
+        );
+
+        formDataSubmit.append(
+            '0-1/device_type',
+            getDeviceType()
+        );
+
+        formDataSubmit.append(
+            '0-1/url_inteligencia_comercial',
+            'https://digisac.com.br/auth/hubspot'
         );
 
         Object.entries(formData).forEach(([key, value]) => {

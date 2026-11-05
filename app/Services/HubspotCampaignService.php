@@ -711,7 +711,7 @@ class HubspotCampaignService
         if($formId){
             $url = "https://api.hsforms.com/submissions/v3/integration/submit/{$this->portalId}/{$formId}";
         
-            $dados = $this->montarCampos($lead);     
+            $dados = $this->montarCampos($lead); 
 
             $response = Http::withToken($this->token)->post($url,$dados);
 
@@ -784,13 +784,30 @@ class HubspotCampaignService
         }
 
         if(!empty($extra_data['0-1/url_inteligencia_comercial'])){
-            if(!empty($lead->url) && $urlInt = $lead->url){
-                $alvo = parse_url($urlInt, PHP_URL_HOST);
-                $alvo = preg_replace('/^www\./i', '', $alvo);                
-                $dadosLead['0-1/url_inteligencia_comercial'] = $extra_data['0-1/url_inteligencia_comercial'].'?alvo='.$alvo;
-            }else{
-                $dadosLead['0-1/url_inteligencia_comercial'] = '';
+            $url_inteligencia_comercial = '';
+            if(!empty($dadosLead['0-1/email']) && $alvo = explode("@", $dadosLead['0-1/email'])){ 
+                if(!empty($alvo)){
+                    $domainsBloqueados = [
+                        'github',
+                        'google',
+                        'gmail',
+                        'facebook',
+                        'live',
+                        'instagram',
+                    ];
+
+                    foreach ($domainsBloqueados as $domain) {
+                        if (stripos($alvo[1], $domain) !== false) {
+                            $alvo = ''; break;
+                        }
+                    }
+
+                    if(!empty($alvo)){
+                        $url_inteligencia_comercial = $extra_data['0-1/url_inteligencia_comercial'].'?alvo='.$alvo[1];
+                    }
+                }
             }
+            $dadosLead['0-1/url_inteligencia_comercial'] = $url_inteligencia_comercial;
         }
 
         if(!empty($extra_data['qual_segmento_representa_melhor_seu_negocio'])){
