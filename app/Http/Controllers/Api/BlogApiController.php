@@ -82,7 +82,7 @@ class BlogApiController extends Controller
                 $host = parse_url($url, PHP_URL_HOST);
                 $arquivo = basename($path ?? '');
 
-                if ($host === 'digisac.com.br' && str_starts_with($path ?? '', $prefixo) && Storage::disk('public')->exists('blogs/' . $arquivo)){
+                if ($host === 'digify.com.br' && str_starts_with($path ?? '', $prefixo) && Storage::disk('public')->exists('blogs/' . $arquivo)){
                     $data['imagem'] = 'blogs/' . $arquivo;
                 }
             }
@@ -116,7 +116,7 @@ class BlogApiController extends Controller
 
         if ($validator->fails()) {
 
-            \Log::warning('DIGISAC UPLOAD - ERRO VALIDACAO', [
+            \Log::warning('Digify UPLOAD - ERRO VALIDACAO', [
                 'errors' => $validator->errors()->toArray(),
             ]);
 
@@ -159,7 +159,7 @@ class BlogApiController extends Controller
                 ->get($url);
 
             if (!$response->successful()) {
-                \Log::warning('DIGISAC UPLOAD - FALHA DOWNLOAD', [
+                \Log::warning('Digify UPLOAD - FALHA DOWNLOAD', [
                     'http_status' => $response->status(),
                     'content_type' => $response->header('Content-Type'),
                     'host' => $host,
