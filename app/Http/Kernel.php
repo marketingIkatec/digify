@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin.permission' => \App\Http\Middleware\AdminPermission::class,
         'digify.token' => \App\Http\Middleware\VerifyDigifyHubspotToken::class,
+        'blog.token' => \App\Http\Middleware\VerifyBlogToken::class,
     ];
 }
