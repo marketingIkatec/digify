@@ -60,8 +60,7 @@ class Blog extends Model
 
 
     public function visitas(){
-        return $this->hasMany(\App\Models\Visitas::class, 'pagina_id')
-            ->where('pagina', 'blog');
+        return $this->hasMany(\App\Models\Visitas::class, 'pagina', 'slug');
     }
 
     public function getSettings(){
