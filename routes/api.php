@@ -35,3 +35,24 @@ Route::prefix('app-digify')->middleware('digify.token')->group(function () {
         'accountActionsStore'
     ]);
 });
+
+Route::prefix('blog')->middleware('blog.token')->group(function () {
+    Route::post('/create-blog', [
+        BlogApiController::class,
+        'store'
+    ]);
+
+    Route::post('/upload-image', [
+        BlogApiController::class,
+        'uploadImage'
+    ]);
+    Route::post('/publish-blog', [
+        BlogApiController::class,
+        'publishBlog'
+    ]);
+
+    Route::get('/test-connection', [
+        BlogApiController::class,
+        'testConnection'
+    ]);
+});
