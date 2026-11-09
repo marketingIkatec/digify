@@ -57,7 +57,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"></script>
     <!-- mascara do celular -->
-    @if ($item->css_app)
+    @if ((!empty($item) and $item->css_app) || !empty($blog))
         <link rel="stylesheet" href="/build/assets/main.css?cache=<?= date('his') ?>">
         <link rel="stylesheet" href="/build/assets/app_blog.css?cache=<?= date('his') ?>">
     @else
@@ -124,7 +124,7 @@
     @endif
     <!-- End BODY Google Tag Manager (noscript) -->
 
-    @if ($item->header_footer)
+    @if ((!empty($item) and $item->header_footer) || !empty($blog))
         <!-- Menu -->
         @include('layouts.header')
         <!-- Menu -->
