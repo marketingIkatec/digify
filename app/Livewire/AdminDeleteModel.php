@@ -17,12 +17,13 @@ use App\Services\UploadService;
 class AdminDeleteModel extends Component
 {
     public Model $item;
-    public string $routeName;
+    #[Locked]
+    public string $route;
 
-    public function mount(Model $item, $routeName = '')
+    public function mount(Model $item, string $route = '')
     {
         $this->item = $item;
-        $this->routeName = $routeName;
+        $this->route = $route;
     }
 
     public function ask()
@@ -32,7 +33,7 @@ class AdminDeleteModel extends Component
 
     public function deleteConfirmed()
     {
-        Gate::authorize('edit-route', $this->routeName);
+        Gate::authorize('delete-route', $this->route);
 
         $name = $this->item->display_name ?? '';
 

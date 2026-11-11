@@ -13,17 +13,18 @@ class AdminStatusModel extends Component
     public Model $item;
     public string $field = 'status';
     public bool $value;
-    public string $routeName;    
+    #[Locked]
+    public string $route;
 
     protected $listeners = ['toggleConfirmed'];
 
-    public function mount(Model $item, string $field = 'status', $routeName = '')
+    public function mount(Model $item, string $field = 'status', string $route = '')
     {
         $this->item  = $item;
         $this->field = $field;
         // 🔥 estado inicial vem do banco
         $this->value = (bool) $item->{$field};
-        $this->routeName = $routeName;
+        $this->route = $route;
     }
 
     public function ask()
@@ -33,8 +34,7 @@ class AdminStatusModel extends Component
 
     public function toggleConfirmed()
     {
-        //blogs.index
-        Gate::authorize('edit-route', $this->routeName);
+        Gate::authorize('edit-route', $this->route);
 
         // 🔁 inverte estado LOCAL primeiro
         $this->value = ! $this->value;
