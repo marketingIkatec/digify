@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccountDigifyHubspot;
+use App\Models\LeadContato;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\HubspotCampaignService;
 use App\Services\DigifyHubspotService;
+use App\Services\LeadsService;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\Api\createAccountDigifyRequest;
 use App\Http\Requests\Api\accountActionsRequest;
 use App\Http\Requests\Api\accountLoggedInRequest;
 use Illuminate\Support\Facades\Log;
+
 
 class AccountDigifyHubspotController extends Controller
 {
@@ -45,6 +48,82 @@ class AccountDigifyHubspotController extends Controller
         Log::info('DIGIFY_NOT_VALIDATED', [
             'function' => 'createAccountDigifyStore',
             'payload'  => $request->all(),
+        ]);
+    }
+
+    /*POST https://digify.com.br/api/app-digify/create-free-test
+      Bearer Token: ****
+      {
+        "event": "create-free-test",             //evento
+        "nome": "Jorge Api",
+        "email": "jorgeapi@ikatec.com.br",
+        "whatsapp": "551499734456",
+        "empresa": "ikatec"
+        }
+      }
+    */     
+
+     public function leadContatoStore(Request $request)
+    {
+        Log::info('DIGIFY_NOT_VALIDATED', [
+            'function' => 'leadContato',
+            'payload'  => $request->all(),
+        ]);
+        
+        $data = $request->all();    
+        $data['0-2/name'] = $data['empresa'];
+        $fillable = (new LeadContato())->getFillable();
+        $extraFields = collect($request->all())
+                ->except($fillable)
+                ->except(['_token']) // remove token do Laravel
+                ->except(['utm_id', 'utm_campaign', 'utm_term', 'utm_source', 'utm_content', 'utm_medium', 'gclid']) // remove campos de tracking
+                ->toArray();
+        $data['extra_data'] = json_encode($extraFields);
+        $data['form_type'] = 'account_create_trial';
+        $data['locale'] = 'pt';
+
+        if(empty($data['mensagem']) && (!empty($data['necessidade']))){
+            $data['mensagem'] = $data['necessidade'];
+        }
+        
+        $modelClass = new LeadContato();
+        $leadsService = new LeadsService();
+        $leadId = $leadsService->saveLead($data, $modelClass);
+
+        $lead = LeadContato::find($leadId);
+        $lead->extra_data = $data['extra_data'];
+        $lead->save(); 
+
+        return response()->json([
+            'success' => true,
+            'event'   => 'account_create_trial',
+            'message' => 'Informação recebida com sucesso!',
+            'data'    => $lead->toArray(),
+        ], 200);
+    }
+
+    /*POST https://digify.com.br/api/app-digify/changed-email-main
+      Bearer Token: ****
+      {
+        "event": "changed-email-main",             //evento
+        "digify_account_id": "", // id do account da conta app.digify.com.br
+        "email_new": "jorgenovo@ikatec.com.br" // novo email
+      }
+    */
+
+      public function changedEmailMainStore(accountActionsRequest $request, DigifyHubspotService $digifyService): JsonResponse
+    {        
+        if($request->validated()){
+            $data = $request->all();  
+            $response  = $digifyService->verifyDigifyAccount($data);
+            if($response['success']){  
+                return $this->returnSuccessJson($data, $response['account']);
+            }        
+            return response()->json([$response], 422);
+        }
+        Log::info('DIGIFY_NOT_VALIDATED', [
+            'function' => 'changedEmailMainStore',
+            'payload'  => $data,
         ]);
     }
 

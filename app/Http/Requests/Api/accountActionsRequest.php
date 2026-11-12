@@ -17,7 +17,10 @@ class accountActionsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'event' => ['required', 'string', 'in:account-actions'],
+            'event' => ['required', 'string', Rule::in([
+                                                'account-actions',
+                                                'changed-email-main',
+                                            ]),],
             'email' => ['sometimes', 'email'],
             //'digify_account_id' => ['required', 'string', Rule::exists('accountDigifyHubspot', 'digify_account_id')],
             'digify_account_id' => ['required', 'string'],

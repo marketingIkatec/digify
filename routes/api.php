@@ -35,6 +35,16 @@ Route::prefix('app-digify')->middleware('digify.token')->group(function () {
         AccountDigifyHubspotController::class,
         'accountActionsStore'
     ]);
+
+    Route::post('/create-free-test', [
+        AccountDigifyHubspotController::class,
+        'leadContatoStore'
+    ]); 
+    
+    Route::post('/changed-email-main', [
+        AccountDigifyHubspotController::class,
+        'changedEmailMainStore'
+    ]);     
 });
 
 Route::prefix('blog')->middleware('blog.token')->group(function () {
